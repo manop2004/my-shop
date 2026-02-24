@@ -41,10 +41,14 @@ export default function LoginPage() {
   const handleOAuthLogin = async (provider) => {
     setErrorMessage("");
 
+    // ตรวจสอบว่ารันบนเบราว์เซอร์หรือไม่ และดึง URL ปัจจุบันมาใช้
+    const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: "http://localhost:3000/mainpage",
+        // จะส่งกลับไปที่ https://www.sanook.com/dictionary/dict/all/search/%E0%B8%9B%E0%B8%B1%E0%B8%88%E0%B8%88%E0%B8%B8%E0%B8%9A%E0%B8%B1%E0%B8%99//mainpage อัตโนมัติ
+        redirectTo: `${baseUrl}/mainpage`, 
       },
     });
 
