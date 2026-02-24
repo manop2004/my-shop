@@ -66,10 +66,12 @@ export default function ProductDetail() {
           setSelectedImage(data.image_url); 
           setGallery([data.image_url, data.image_url, data.image_url, data.image_url]);
         } else {
+          // เพิ่ม stock: 5 เข้าไปใน mock เผื่อไว้ทดสอบ
           const mockProduct = {
             id: 1,
             name: "ชื่อเฉพาะ (จากป้ายด้านล่าง): มีการระบุชื่อ \"Siamese Coqu Culture Crafts\"",
             price: 2500,
+            stock: 5, 
             image_url: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop", 
             description: "พานประดับมุก (บนแท่น): เป็นพานทรงแปดเหลี่ยม 2 ขนาด ภายในบุด้วยผ้าสีแดง สำหรับใช้ใส่ของมงคลหรือเครื่องใช้สำคัญ\n\nกล่องไม้หรือตลับประดับมุก (ด้านหน้า): กล่องทรงสี่เหลี่ยมผืนผ้าประดับลวดลายดอกไม้และเถาวัลย์อย่างละเอียด"
           };
@@ -84,13 +86,36 @@ export default function ProductDetail() {
     fetchProduct();
   }, [params?.id]);
 
-  const increaseQuantity = () => setQuantity((prev) => prev + 1);
-  const decreaseQuantity = () => { if (quantity > 1) setQuantity((prev) => prev - 1); };
+  // 🌟 บังคับไม่ให้กดเกินสต็อก และไม่ให้กดต่ำกว่า 1
+  const increaseQuantity = () => {
+    if (product && quantity < product.stock) {
+      setQuantity((prev) => prev + 1);
+    }
+  };
+  const decreaseQuantity = () => { 
+    if (quantity > 1) {
+      setQuantity((prev) => prev - 1); 
+    }
+  };
   
   // --- ฟังก์ชันจัดการตะกร้า ---
   const handleAddToCart = () => {
+    // 🌟 เช็กสต็อก: ถ้าสินค้าหมดให้หยุดทันที
+    if (!product || product.stock === 0) return;
+
+    // 🌟 เช็กจำนวน: รวมกับของที่มีในตะกร้าแล้วเกินสต็อกไหม?
+    const existingItem = cartItems.find((item) => item.id === product.id);
+    let totalQuantityWanted = quantity;
+    if (existingItem) {
+      totalQuantityWanted += existingItem.quantity;
+    }
+
+    if (totalQuantityWanted > product.stock) {
+      alert(`ไม่สามารถเพิ่มลงตะกร้าได้! มีสินค้าในสต็อกเพียง ${product.stock} ชิ้น`);
+      return;
+    }
+
     setCartItems((prev) => {
-      const existingItem = prev.find((item) => item.id === product.id);
       if (existingItem) {
         return prev.map((item) =>
           item.id === product.id
@@ -113,6 +138,11 @@ export default function ProductDetail() {
       prev.map((item) => {
         if (item.id === id) {
           const newQty = item.quantity + delta;
+          // 🌟 เช็กสต็อกในหน้าตะกร้า: ถ้ากด + เกินสต็อกให้เด้งเตือน
+          if (delta > 0 && item.stock !== undefined && newQty > item.stock) {
+             alert(`มีสินค้าในสต็อกเพียง ${item.stock} ชิ้น`);
+             return item;
+          }
           return newQty > 0 ? { ...item, quantity: newQty } : item;
         }
         return item;
@@ -186,14 +216,14 @@ export default function ProductDetail() {
               <span className="font-medium">หน้าแรก</span>
             </div>
             <div onClick={() => { router.back(); setIsSidebarOpen(false); }} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-3 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
-              <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
               <span className="font-medium">สินค้าทั้งหมด</span>
             </div>
           </nav>
 
           <hr className="border-gray-100" />
 
-          {/* ส่วนแสดงสินค้าที่กำลังดูอยู่ (แก้ปัญหาตัวหนังสือยาวๆ โล่งๆ) */}
+          {/* ส่วนแสดงสินค้าที่กำลังดูอยู่ */}
           <div>
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#C5A059] animate-pulse"></span>
@@ -223,7 +253,7 @@ export default function ProductDetail() {
 
         </div>
 
-        {/* ส่วนท้ายเมนู (Footer) เติมเต็มพื้นที่ด้านล่าง */}
+        {/* ส่วนท้ายเมนู (Footer) */}
         <div className="p-6 border-t border-gray-100 bg-gray-50/50">
           <div className="text-center text-xs text-gray-400 mb-4 font-serif tracking-wide">
             MUSEUM SHOP
@@ -234,6 +264,7 @@ export default function ProductDetail() {
           </div>
         </div>
       </aside>
+      
       {/* --- Cart Overlay --- */}
       <div 
         className={`fixed inset-0 bg-black/50 z-[60] transition-opacity duration-300 ${isCartOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
@@ -243,11 +274,6 @@ export default function ProductDetail() {
       {/* =========================================
           CART SIDEBAR (ตะกร้าสินค้าด้านขวา)
       ========================================= */}
-      <div 
-        className={`fixed inset-0 bg-black/40 z-[60] transition-opacity duration-300 ${isCartOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
-        onClick={() => setIsCartOpen(false)}
-      />
-
       <aside className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}>
         {/* Cart Header */}
         <div className="p-6 flex justify-between items-center border-b border-gray-100">
@@ -371,13 +397,42 @@ export default function ProductDetail() {
 
             <hr className="border-gray-100 mb-6" />
 
-            {/* ระบุจำนวนที่ต้องการ */}
-            <div className="mb-6 flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
-              <span className="text-gray-700 font-medium">ระบุจำนวนที่ต้องการ</span>
-              <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-10 w-32">
-                <button onClick={decreaseQuantity} className="w-10 h-full hover:bg-gray-50 text-xl">-</button>
-                <div className="flex-1 text-center font-bold text-sm">{quantity}</div>
-                <button onClick={increaseQuantity} className="w-10 h-full hover:bg-gray-50 text-xl">+</button>
+            {/* 🌟 ส่วนแก้ไข: ระบุจำนวนที่ต้องการ และ แสดงสต็อก 🌟 */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-gray-100 shadow-sm">
+                <span className="text-gray-700 font-medium">ระบุจำนวนที่ต้องการ</span>
+                <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-10 w-32">
+                  <button 
+                    onClick={decreaseQuantity} 
+                    disabled={quantity <= 1 || product?.stock === 0}
+                    className={`w-10 h-full text-xl flex items-center justify-center transition-colors ${
+                      quantity <= 1 || product?.stock === 0 ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    -
+                  </button>
+                  <div className="flex-1 text-center font-bold text-sm bg-white flex items-center justify-center">
+                    {product?.stock === 0 ? 0 : quantity}
+                  </div>
+                  <button 
+                    onClick={increaseQuantity} 
+                    disabled={quantity >= product?.stock || product?.stock === 0}
+                    className={`w-10 h-full text-xl flex items-center justify-center transition-colors ${
+                      quantity >= product?.stock || product?.stock === 0 ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'hover:bg-gray-50'
+                    }`}
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              
+              {/* ข้อความแสดงสต็อก */}
+              <div className="mt-2 text-right text-sm">
+                {product?.stock > 0 ? (
+                  <span className="text-gray-500">มีสินค้าทั้งหมด <span className="text-[#C5A059] font-medium">{product.stock}</span> ชิ้น</span>
+                ) : (
+                  <span className="text-red-500 font-medium">สินค้าหมด</span>
+                )}
               </div>
             </div>
 
@@ -406,16 +461,35 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            <button onClick={handleAddToCart} className="hidden md:flex bg-[#BCA88E] hover:bg-[#A9937E] text-white font-medium h-14 w-full rounded-xl items-center justify-center gap-2 shadow-lg transition-all text-lg">
-              เพิ่มลงตะกร้า
+            {/* 🌟 ปุ่มเพิ่มลงตะกร้า (หน้าจอ Desktop) 🌟 */}
+            <button 
+              onClick={handleAddToCart} 
+              disabled={product?.stock === 0}
+              className={`hidden md:flex font-medium h-14 w-full rounded-xl items-center justify-center gap-2 transition-all text-lg ${
+                product?.stock === 0 
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
+                  : 'bg-[#BCA88E] hover:bg-[#A9937E] text-white shadow-lg'
+              }`}
+            >
+              {product?.stock === 0 ? 'สินค้าหมด' : 'เพิ่มลงตะกร้า'}
             </button>
           </div>
         </div>
       </main>
 
-      {/* Mobile Footer */}
+      {/* 🌟 ปุ่มเพิ่มลงตะกร้า (Mobile Footer) 🌟 */}
       <div className="md:hidden fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t p-4 z-40 pb-8">
-        <button onClick={handleAddToCart} className="w-full bg-[#A38A6A] hover:bg-[#8B735A] text-white h-[50px] rounded-full font-bold shadow-md transition-colors text-[16px]">เพิ่มลงตะกร้า</button>
+        <button 
+          onClick={handleAddToCart} 
+          disabled={product?.stock === 0}
+          className={`w-full h-[50px] rounded-full font-bold transition-colors text-[16px] flex justify-center items-center ${
+            product?.stock === 0 
+              ? 'bg-gray-200 text-gray-400 cursor-not-allowed shadow-none' 
+              : 'bg-[#A38A6A] hover:bg-[#8B735A] text-white shadow-md'
+          }`}
+        >
+          {product?.stock === 0 ? 'สินค้าหมด' : 'เพิ่มลงตะกร้า'}
+        </button>
       </div>
 
     </div>

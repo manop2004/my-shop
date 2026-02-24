@@ -10,6 +10,15 @@ export default function ShopPage() {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+    };
+    fetchUser();
+  }, []);
 
   // --- เพิ่ม State สำหรับ Sidebar เมนูด้านซ้าย ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -39,12 +48,23 @@ export default function ShopPage() {
     }
   }, [cartItems, isCartLoaded]);
 
-  // --- ฟังก์ชันจัดการตะกร้า ---
+  // --- ฟังก์ชันจัดการตะกร้า (🌟 อัปเกรดระบบเช็กสต็อกแล้ว) ---
   const updateCartItemQuantity = (id, delta) => {
     setCartItems((prev) =>
       prev.map((item) => {
         if (item.id === id) {
           const newQty = item.quantity + delta;
+          
+          // 🌟 เช็กสต็อก: ดึงสต็อกล่าสุดจาก products state ที่โหลดมาในหน้านี้
+          const realProduct = products.find(p => p.id === id);
+          const currentStock = realProduct ? realProduct.stock : item.stock;
+
+          // 🌟 ถ้าพยายามกด + เกินสต็อก ให้แจ้งเตือนและหยุดการทำงาน
+          if (delta > 0 && currentStock !== undefined && newQty > currentStock) {
+            alert(`ไม่สามารถเพิ่มจำนวนได้! มีสินค้าในสต็อกเพียง ${currentStock} ชิ้น`);
+            return item;
+          }
+
           return newQty > 0 ? { ...item, quantity: newQty } : item;
         }
         return item;
@@ -264,13 +284,18 @@ export default function ShopPage() {
             <span className="text-sm font-medium tracking-wide text-gray-500 hidden md:inline">ช้อปปิ้งออนไลน์</span>
           </div>
           <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+  {/* ถ้ามี user ให้โชว์ email */}
+  {user && <span className="text-sm text-gray-600 font-medium">{user.email}</span>}
+  
+  <Link href={user ? "/profile" : "/login"} className="hover:text-[#C5A059] transition-colors">
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+  </svg>
+</Link>
+</div>
             
-            {/* 👇 เปลี่ยนตรงนี้เป็นไอคอนรูปคน (User) 👇 */}
-            <Link href="/" className="text-gray-800 hover:text-[#C5A059] transition-colors" title="บัญชีผู้ใช้">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-              </svg>
-            </Link>
+           
             
             {/* --- ไอคอนตะกร้าบน Navbar --- */}
             <button onClick={() => setIsCartOpen(true)} className="relative hover:text-[#C5A059] transition-colors text-gray-800" title="ตะกร้าสินค้า">

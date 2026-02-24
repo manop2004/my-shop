@@ -7,9 +7,10 @@ import { supabase } from '@/utils/supabase';
 function CheckoutContent() {
   const router = useRouter();
   
-  // เปลี่ยนจากดึง product ตัวเดียว เป็นดึงตะกร้าสินค้า
   const [cartItems, setCartItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -23,7 +24,6 @@ function CheckoutContent() {
     if (savedFormData) {
       try {
         setFormData(JSON.parse(savedFormData));
-        // ลบทิ้งทันที เพื่อที่เวลากดกลับหน้าหลัก ข้อมูลจะได้ไม่ตามไปด้วย
         sessionStorage.removeItem("checkoutFormData");
       } catch (error) {
         console.error("Error parsing saved form data:", error);
@@ -45,12 +45,11 @@ function CheckoutContent() {
     setIsLoading(false);
   }, []);
 
-  // ปรับปรุงฟังก์ชันให้กรองเฉพาะตัวเลขสำหรับเบอร์โทรศัพท์
+  // กรองเฉพาะตัวเลขสำหรับเบอร์โทรศัพท์
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
     if (name === "phone") {
-      // แทนที่ตัวอักษรที่ไม่ใช่ตัวเลขด้วยค่าว่าง (รับเฉพาะ 0-9)
       const numericValue = value.replace(/\D/g, '');
       setFormData((prev) => ({ ...prev, [name]: numericValue }));
     } else {
@@ -58,15 +57,45 @@ function CheckoutContent() {
     }
   };
 
-  const handleSubmit = (e) => {
+  // 🌟 ฟังก์ชันยืนยันการสั่งซื้อ (เช็กสต็อกเฉยๆ แต่ยังไม่ตัดสต็อก)
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // เซฟข้อมูลเฉพาะตอนกำลังจะข้ามไปหน้า Payment
-    sessionStorage.setItem("checkoutFormData", JSON.stringify(formData));
-    
-    // รวม ID สินค้าทั้งหมดสำหรับอ้างอิงออเดอร์ (กรณีมีหลายชิ้น)
-    const orderIds = cartItems.map(item => item.id).join(',');
-    
-    router.push(`/payment?method=promptpay&amount=${totalPrice}&order=${orderIds}`); 
+    setIsSubmitting(true); 
+
+    try {
+      // 1️⃣ ตรวจสอบสต็อกของสินค้าทุกชิ้นในตะกร้าก่อน (แต่ยังไม่ตัด เพื่อกันลูกค้าหลงไปหน้าชำระเงินถ้าของหมด)
+      for (const item of cartItems) {
+        const { data: product, error: fetchError } = await supabase
+          .from("products")
+          .select("stock, name")
+          .eq("id", item.id)
+          .single();
+
+        if (fetchError || !product) {
+          throw new Error(`ไม่พบข้อมูลสินค้า: ${item.name} ในระบบ`);
+        }
+
+        // ถ้าจำนวนที่สั่ง มากกว่าสต็อกที่มีในระบบ
+        if (product.stock < item.quantity) {
+          throw new Error(`ขออภัย สินค้า "${item.name}" มีสต็อกไม่พอ (เหลือเพียง ${product.stock} ชิ้น)`);
+        }
+      }
+
+      // 2️⃣ ถ้าสต็อกพอ ให้พาไปหน้า Payment ทันที (ย้ายการตัดสต็อกไปไว้หน้า Payment แทนแล้ว)
+      sessionStorage.setItem("checkoutFormData", JSON.stringify(formData));
+      
+      const orderIds = cartItems.map(item => item.id).join(',');
+      const totalProductPrice = cartItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+      const totalPrice = totalProductPrice; // + shippingFee ถ้ามี
+      
+      router.push(`/payment?method=promptpay&amount=${totalPrice}&order=${orderIds}`); 
+
+    } catch (error) {
+      // ถ้ามี Error (เช่น สต็อกไม่พอ) ให้เด้ง Alert แจ้งลูกค้า
+      alert(error.message);
+    } finally {
+      setIsSubmitting(false); 
+    }
   };
 
   if (isLoading) {
@@ -83,7 +112,6 @@ function CheckoutContent() {
     );
   }
 
-  // คำนวณราคาสินค้ารวมทั้งหมดในตะกร้า
   const totalProductPrice = cartItems.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
   const totalQuantity = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const shippingFee = 0; 
@@ -124,7 +152,6 @@ function CheckoutContent() {
           <div className="bg-white p-6 sm:p-8 rounded-md shadow-sm border border-gray-100">
             <h2 className="text-xl font-medium mb-6 border-b pb-4">สรุปคำสั่งซื้อ</h2>
             
-            {/* วนลูปแสดงสินค้าทุกชิ้นในตะกร้า */}
             <div className="max-h-[350px] overflow-y-auto pr-2 mb-6 space-y-4">
               {cartItems.map((item, index) => (
                 <div key={index} className="flex gap-4 items-center">
@@ -213,9 +240,24 @@ function CheckoutContent() {
 
               <button
                 type="submit"
-                className="mt-6 bg-[#C5A059] hover:bg-[#B38E46] text-white py-3 rounded-sm text-lg font-medium transition-colors shadow-sm w-full"
+                disabled={isSubmitting}
+                className={`mt-6 py-3 rounded-sm text-lg font-medium transition-colors shadow-sm w-full flex justify-center items-center ${
+                  isSubmitting 
+                    ? 'bg-gray-400 text-white cursor-not-allowed' 
+                    : 'bg-[#C5A059] hover:bg-[#B38E46] text-white'
+                }`}
               >
-                ยืนยันการสั่งซื้อ
+                {isSubmitting ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    กำลังตรวจสอบข้อมูล...
+                  </>
+                ) : (
+                  'ยืนยันการสั่งซื้อ'
+                )}
               </button>
             </form>
           </div>

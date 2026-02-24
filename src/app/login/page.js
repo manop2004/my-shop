@@ -22,26 +22,29 @@ export default function LoginPage() {
     });
 
     if (error) {
+      // 🌟 ปริ้นท์ Error ลง Console (กด F12 ดูได้)
+      console.error("Supabase Login Error:", error); 
+
       if (error.message === "Invalid login credentials") {
         setErrorMessage("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
       } else if (error.message === "Email not confirmed") {
         setErrorMessage("กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ");
       } else {
-        setErrorMessage("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+        // 🌟 เปลี่ยนให้โชว์ข้อความ Error จริงๆ จาก Supabase ชั่วคราว
+        setErrorMessage(`เกิดข้อผิดพลาด: ${error.message}`); 
       }
       return;
     }
 
-    router.push("/home");
+    router.push("/mainpage");
   };
-
   const handleOAuthLogin = async (provider) => {
     setErrorMessage("");
 
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
       options: {
-        redirectTo: "http://localhost:3000/home",
+        redirectTo: "http://localhost:3000/mainpage",
       },
     });
 
@@ -71,27 +74,34 @@ export default function LoginPage() {
           <div className="flex-1 h-px bg-gray-300" />
         </div>
 
-        <input
-          placeholder="อีเมล"
-          className="w-full border rounded-lg px-4 py-3 mb-3 focus:ring-2 focus:ring-gray-400"
-          onChange={(e) => setEmail(e.target.value)}
-        />
 
-        <div className="relative mb-3">
-          <input
-            type={showPassword ? "text" : "password"}
-            placeholder="รหัสผ่าน"
-            className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-gray-400"
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-4 top-3 text-gray-500"
-          >
-            👁
-          </button>
-        </div>
+
+<input
+  type="email" // แนะนำให้ใส่ type="email" เพื่อความปลอดภัย
+  placeholder="อีเมล"
+  value={email} // 🌟 เพิ่มบรรทัดนี้
+  className="w-full border rounded-lg px-4 py-3 mb-3 focus:ring-2 focus:ring-gray-400"
+  onChange={(e) => setEmail(e.target.value)}
+/>
+
+<div className="relative mb-3">
+  <input
+    type={showPassword ? "text" : "password"}
+    placeholder="รหัสผ่าน"
+    value={password} // 🌟 เพิ่มบรรทัดนี้
+    className="w-full border rounded-lg px-4 py-3 focus:ring-2 focus:ring-gray-400"
+    onChange={(e) => setPassword(e.target.value)}
+  />
+  <button
+    type="button"
+    onClick={() => setShowPassword(!showPassword)}
+    className="absolute right-4 top-3 text-gray-500"
+  >
+     
+  </button>
+</div>
+
+
 
         {errorMessage && (
           <p className="text-red-500 text-sm text-center mt-3">
