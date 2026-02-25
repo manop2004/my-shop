@@ -14,22 +14,41 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const handleSendOtp = async (e) => {
+ const handleSendOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    try {
+      // 1. 🌟 เช็กก่อนว่ามีอีเมลนี้ในระบบ (ตาราง members) หรือไม่
+      const { data: member, error: fetchError } = await supabase
+        .from('members')
+        .select('email')
+        .eq('email', email)
+        .single();
 
-    if (error) {
-      setMessage("เกิดข้อผิดพลาด: " + error.message);
-    } else {
-      setMessage("ส่งรหัส OTP ไปยังอีเมลของคุณแล้ว");
-      setStep(2);
+      // ถ้าไม่พบข้อมูล หรือ error ว่าไม่เจอแถวข้อมูล
+      if (fetchError || !member) {
+        setMessage("ไม่พบอีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง หรือสมัครสมาชิก");
+        setLoading(false);
+        return; // หยุดการทำงาน ไม่ส่ง OTP
+      }
+
+      // 2. ถ้าเจออีเมล ถึงจะทำการส่ง OTP สำหรับ Reset Password
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email);
+
+      if (resetError) {
+        setMessage("เกิดข้อผิดพลาด: " + resetError.message);
+      } else {
+        setMessage("ส่งรหัส OTP ไปยังอีเมลของคุณแล้ว");
+        setStep(2);
+      }
+    } catch (err) {
+      setMessage("เกิดข้อผิดพลาดในการตรวจสอบข้อมูล");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
-
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -50,11 +69,13 @@ export default function ForgotPasswordPage() {
     setLoading(false);
   };
 
+  // 🌟 ฟังก์ชันอัปเดตรหัสผ่าน (ปรับปรุงให้บันทึกลงตาราง members ด้วย)
   const handleUpdatePassword = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage("");
 
+    // 1. อัปเดตรหัสผ่านใหม่ในระบบ Auth ของ Supabase
     const { error } = await supabase.auth.updateUser({
       password: password,
     });
@@ -62,10 +83,17 @@ export default function ForgotPasswordPage() {
     if (error) {
       setMessage("ไม่สามารถเปลี่ยนรหัสผ่านได้: " + error.message);
     } else {
+      
+      // 🌟 2. อัปเดตรหัสผ่านใหม่ลงในตาราง members
+      await supabase
+        .from('members')
+        .update({ password: password })
+        .eq('email', email);
+
       setMessage("เปลี่ยนรหัสผ่านสำเร็จแล้ว!");
       setTimeout(() => {
-      router.push("/login"); 
-    }, 2000);
+        router.push("/login"); 
+      }, 2000);
     }
     setLoading(false);
   };
@@ -150,7 +178,6 @@ export default function ForgotPasswordPage() {
               </button>
             </div>
             
-            {/* 🌟 เพิ่มปุ่มกดยืนยันตรงนี้ครับ 🌟 */}
             <button
               type="submit"
               disabled={loading}

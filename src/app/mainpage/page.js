@@ -11,11 +11,33 @@ export default function ShopPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState(""); // 🌟 เพิ่ม State สำหรับเก็บชื่อ
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
+
+      // 🌟 ดึงชื่อผู้ใช้มาแสดง
+      if (session?.user) {
+        let name = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+        
+        // ถ้าใน auth ไม่มีชื่อ ลองดึงจากตาราง members มาเสริม
+        if (!name) {
+          try {
+            const { data } = await supabase
+              .from('members')
+              .select('full_name') // 📌 ถ้าในตารางตั้งชื่อคอลัมน์ว่า name ให้แก้ตรงนี้เป็น name ครับ
+              .eq('email', session.user.email)
+              .single();
+            if (data && data.full_name) name = data.full_name;
+          } catch (error) {
+            console.log("Could not fetch name from members");
+          }
+        }
+        // เซ็ตชื่อ ถ้าไม่มีชื่อจริงๆ ค่อยดึงอีเมลมาโชว์แทน
+        setUserName(name || session.user.email);
+      }
     };
     fetchUser();
   }, []);
@@ -285,8 +307,8 @@ export default function ShopPage() {
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-  {/* ถ้ามี user ให้โชว์ email */}
-  {user && <span className="text-sm text-gray-600 font-medium">{user.email}</span>}
+  {/* 🌟 ถ้ามี user ให้โชว์ชื่อแทน email แล้วครับ 🌟 */}
+  {user && <span className="text-sm text-gray-600 font-medium">{userName}</span>}
   
   <Link href={user ? "/profile" : "/login"} className="hover:text-[#C5A059] transition-colors">
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
