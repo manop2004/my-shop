@@ -242,11 +242,24 @@ export default function PaymentPage() {
         </p>
       </div>
 
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => setSlipImage(e.target.files[0])}
-      />
+      <div className="w-full mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          อัปโหลดหลักฐานการโอนเงิน
+        </label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={(e) => setSlipImage(e.target.files[0])}
+          className="block w-full text-sm text-blue-400
+            file:mr-4 file:py-2.5 file:px-4
+            file:rounded-md file:border-0
+            file:text-sm file:font-semibold
+            file:bg-blue-400 file:text-white
+            hover:file:bg-blue-400
+            cursor-pointer
+            border border-blue-400 rounded-lg bg-white shadow-sm"
+        />
+      </div>
 
       <button
         onClick={handleConfirmPayment}

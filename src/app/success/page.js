@@ -103,7 +103,7 @@ function SuccessContent() {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center text-[#C5A059] font-medium">
-        กำลังประมวลผลคำสั่งซื้อและตัดสต็อก...
+        กำลังประมวลผลคำสั่งซื้อ...
       </div>
     );
   }

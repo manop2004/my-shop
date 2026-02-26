@@ -17,9 +17,11 @@ export default function EditProductPage() {
     description: "", 
     price: "", 
     stock: "", 
-    image_url: "" 
+    image_url: "",
+    gallery: [] // 🌟 เพิ่มสำหรับเก็บรูปรายละเอียดเดิม
   });
   const [imageFile, setImageFile] = useState(null);
+  const [galleryFiles, setGalleryFiles] = useState([]); // 🌟 เพิ่มสำหรับเก็บไฟล์รูปรายละเอียดใหม่
 
   // 1. ดึงข้อมูลเดิมมาแสดง
   useEffect(() => {
@@ -49,8 +51,9 @@ export default function EditProductPage() {
 
     try {
       let imageUrlToSave = formData.image_url; 
+      let galleryUrlsToSave = formData.gallery || []; // เตรียมเก็บรูประดับรายละเอียด
 
-      // --- ขั้นตอนที่ 1: อัปโหลดรูปภาพ (ถ้ามี) ---
+      // --- ขั้นตอนที่ 1: อัปโหลดรูปภาพหลัก (ถ้ามี) ---
       if (imageFile) {
         const fileExt = imageFile.name.split('.').pop();
         const fileName = `edit_${Date.now()}.${fileExt}`; 
@@ -76,6 +79,33 @@ export default function EditProductPage() {
         imageUrlToSave = `${publicUrlData.publicUrl}?t=${Date.now()}`;
       }
 
+      // --- ขั้นตอนที่ 1.5: อัปโหลดรูปภาพรายละเอียด (ถ้ามีการเลือกใหม่) 🌟 ---
+      if (galleryFiles && galleryFiles.length > 0) {
+        const uploadedGallery = [];
+        for (let i = 0; i < galleryFiles.length; i++) {
+          const file = galleryFiles[i];
+          const fileExt = file.name.split('.').pop();
+          const fileName = `gallery_${Date.now()}_${i}.${fileExt}`;
+
+          const { error: uploadError } = await supabase.storage
+            .from('products')
+            .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+          if (uploadError) {
+            alert("❌ อัปโหลดรูปรายละเอียดไม่ผ่าน!\nสาเหตุ: " + uploadError.message);
+            setLoading(false);
+            return;
+          }
+
+          const { data: publicUrlData } = supabase.storage
+            .from('products')
+            .getPublicUrl(fileName);
+
+          uploadedGallery.push(`${publicUrlData.publicUrl}?t=${Date.now()}`);
+        }
+        galleryUrlsToSave = uploadedGallery; // ถ้ามีการอัปรูปใหม่ จะเอาไปแทนที่รูปเก่า
+      }
+
       // --- ขั้นตอนที่ 2: อัปเดตข้อมูลลงตาราง Products ---
       const { error: dbError } = await supabase
         .from("products")
@@ -84,7 +114,8 @@ export default function EditProductPage() {
           description: formData.description,
           price: Number(formData.price),
           stock: Number(formData.stock),
-          image_url: imageUrlToSave
+          image_url: imageUrlToSave,
+          gallery: galleryUrlsToSave // 🌟 อัปเดต array รูปลงคอลัมน์ gallery
         })
         .eq("id", Number(productId)); // 👈 อัปเดตตาม ID ที่เป็นตัวเลข
 
@@ -159,7 +190,7 @@ export default function EditProductPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">รูปภาพสินค้า</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">รูปภาพสินค้าหลัก</label>
           {formData.image_url && !imageFile && (
             <div className="mb-2">
               <p className="text-xs text-gray-500 mb-1">รูปปัจจุบัน:</p>
@@ -171,6 +202,30 @@ export default function EditProductPage() {
             className="w-full border border-gray-300 p-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-yellow-500 outline-none"
             onChange={(e) => setImageFile(e.target.files[0])}
           />
+        </div>
+
+        {/* 🌟 ส่วนที่เพิ่มขึ้นมาใหม่ สำหรับรูปรายละเอียด (Gallery) 🌟 */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">รูปภาพรายละเอียดสินค้า (เลือกได้หลายรูป)</label>
+          
+          {/* แสดงรูปลายละเอียดเดิม ถ้ายังไม่ได้เลือกรูปใหม่ */}
+          {formData.gallery && formData.gallery.length > 0 && galleryFiles.length === 0 && (
+            <div className="mb-2">
+              <p className="text-xs text-gray-500 mb-1">รูปรายละเอียดปัจจุบัน:</p>
+              <div className="flex gap-2 overflow-x-auto">
+                {formData.gallery.map((url, index) => (
+                  <img key={index} src={url} alt={`Gallery ${index}`} className="w-16 h-16 object-cover rounded border flex-shrink-0" />
+                ))}
+              </div>
+            </div>
+          )}
+          
+          <input 
+            type="file" accept="image/*" multiple // 👈 multiple ทำให้เลือกลากคลุมได้หลายไฟล์
+            className="w-full border border-gray-300 p-2 rounded-lg bg-gray-50 focus:ring-2 focus:ring-yellow-500 outline-none"
+            onChange={(e) => setGalleryFiles(Array.from(e.target.files))} // แปลงเป็น Array เพื่อให้วนลูปง่าย
+          />
+          <p className="text-xs text-gray-400 mt-1">* หากเลือกไฟล์ใหม่ ระบบจะนำไปแทนที่รูปรายละเอียดชุดเดิมทั้งหมด</p>
         </div>
 
         <button 

@@ -95,7 +95,7 @@ export default function ProductDetail() {
         if (data) {
           setProduct(data); 
           setSelectedImage(data.image_url); 
-          setGallery([data.image_url, data.image_url, data.image_url, data.image_url]);
+          setGallery(data.gallery && data.gallery.length > 0 ? data.gallery : [data.image_url]);
         } else {
           // เพิ่ม stock: 5 เข้าไปใน mock เผื่อไว้ทดสอบ
           const mockProduct = {
@@ -430,10 +430,39 @@ export default function ProductDetail() {
                 style={{ transform: isZoomed ? "scale(2.5)" : "scale(1)", transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
               />
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {gallery.map((img, index) => (
-                <button key={index} onClick={() => setSelectedImage(img)} className={`w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 ${selectedImage === img ? "border-[#C5A059]" : "border-transparent opacity-60"}`}>
-                  <img src={img} className="w-full h-full object-cover" />
+            {/* 🌟 แสดงรูปย่อย (รวมรูปหลักไว้รูปแรก) 🌟 */}
+            <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
+              
+              {/* 1. ปุ่มสำหรับ "รูปหลัก" (รูปแรกเสมอ) */}
+              {product?.image_url && (
+                <button
+                  onClick={() => setSelectedImage(product.image_url)} 
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${
+                    selectedImage === product.image_url ? "border-[#C5A059] opacity-100" : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={product.image_url}
+                    alt="Main Product"
+                    className="object-cover w-full h-full"
+                  />
+                </button>
+              )}
+
+              {/* 2. แสดงรูปรายละเอียด (Gallery) ถัดมา */}
+              {gallery && gallery.map((imgUrl, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(imgUrl)}
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${
+                    selectedImage === imgUrl ? "border-[#C5A059] opacity-100" : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={imgUrl}
+                    alt={`gallery-${index}`}
+                    className="object-cover w-full h-full"
+                  />
                 </button>
               ))}
             </div>
