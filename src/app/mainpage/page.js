@@ -169,6 +169,8 @@ export default function ShopPage() {
         </div>
         <div className="p-6 border-t border-gray-100 bg-[#faf9f7]">
           <div className="text-center text-xs text-gray-400 mb-4 font-serif tracking-widest">MUSEUM SHOP</div>
+
+          
         </div>
       </aside>
 
@@ -236,14 +238,12 @@ export default function ShopPage() {
 
       {/* NAVBAR */}
       <nav className="bg-white border-b border-[#e8dcc4] sticky top-0 z-50 shadow-sm">
-        <div className="max-w-[1300px] mx-auto px-6 h-[70px] flex items-center justify-between">
+        <div className="max-w-[1300px] mx-auto px-6 h-[70px] grid grid-cols-3 items-center">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsSidebarOpen(true)} className="text-gray-800 hover:text-[#C5A059] transition-colors mr-2">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-            <h1 className="text-xl md:text-2xl font-serif font-bold tracking-[0.15em] text-[#C5A059] drop-shadow-sm">MUSEUM SHOP</h1>
-            <span className="text-gray-300 hidden md:inline">|</span>
-            <span className="text-sm font-medium tracking-wide text-gray-500 hidden md:inline">ช้อปปิ้งออนไลน์</span>
+            <h1 className="text-xl md:text-2xl font-serif font-semibold tracking-[0.25em] text-[#C5A059] drop-shadow-sm">MUSEUM SHOP</h1>
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">

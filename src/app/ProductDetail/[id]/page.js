@@ -95,7 +95,7 @@ export default function ProductDetail() {
         if (data) {
           setProduct(data); 
           setSelectedImage(data.image_url); 
-          setGallery([data.image_url, data.image_url, data.image_url, data.image_url]);
+          setGallery(data.gallery && data.gallery.length > 0 ? data.gallery : [data.image_url]); 
         } else {
           // เพิ่ม stock: 5 เข้าไปใน mock เผื่อไว้ทดสอบ
           const mockProduct = {
@@ -492,10 +492,24 @@ export default function ProductDetail() {
 
             {/* ปุ่มสอบถาม/แชร์ */}
             <div className="grid grid-cols-2 gap-0 border-b border-gray-100 mb-8">
-              <button className="flex flex-col items-center gap-2 py-4 border-r border-gray-100 text-gray-500 hover:text-[#C5A059]">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-                <span className="text-sm">สอบถามเพิ่มเติม</span>
-              </button>
+            
+
+<button
+  onClick={() => router.push('/Inquiryform')} // 👈 เพิ่มบรรทัดนี้เข้าไป
+  className="flex flex-col items-center gap-2 py-4 text-gray-500 hover:text-[#C5A059]"
+>
+  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth="1" 
+      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
+    ></path>
+  </svg>
+  <span className="text-sm">สอบถามเพิ่มเติม</span>
+</button>
+
+
               <button
   onClick={() => router.push('/Sharemodel')} // 👈 เพิ่มบรรทัดนี้เข้าไป
   className="flex flex-col items-center gap-2 py-4 text-gray-500 hover:text-[#C5A059]"
