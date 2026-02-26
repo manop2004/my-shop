@@ -159,31 +159,10 @@ export default function ShopPage() {
                 <span className="font-medium">สินค้าทั้งหมด</span>
               </div>
             </nav>
-          </div>
-          <hr className="border-gray-100" />
-          <div>
-            <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Categories</div>
-            <nav className="flex flex-col gap-4 text-[15px] text-gray-600 pl-3 border-l-2 border-gray-100">
-              <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>งานเซรามิก</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
-              </div>
-              <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>งานไม้ประยุกต์</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
-              </div>
-              <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>งานจักสาน</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
-              </div>
-              <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>ของที่ระลึก</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
-              </div>
-            </nav>
-          </div>
-          <hr className="border-gray-100" />
-          <div>
+          
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Information</div>
             <nav className="flex flex-col gap-3 text-[14px] text-gray-500 pl-3 border-l-2 border-gray-100">
               <a href="#" className="hover:text-[#C5A059] transition-colors">เกี่ยวกับศูนย์ศิลปาชีพฯ</a>
-              <a href="#" className="hover:text-[#C5A059] transition-colors">วิธีการสั่งซื้อและจัดส่ง</a>
               <a href="#" className="hover:text-[#C5A059] transition-colors">ติดต่อเรา</a>
             </nav>
           </div>
