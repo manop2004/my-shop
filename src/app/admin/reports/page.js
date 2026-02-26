@@ -2,9 +2,17 @@ import { supabase } from '@/utils/supabase';
 
 export default async function ReportsPage() {
   const { data: orders, error } = await supabase
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false });
+  .from('orders')
+  .select(`
+    id,
+    created_at,
+    order_items (
+      product_name,
+      quantity,
+      price
+    )
+  `)
+  .order('created_at', { ascending: false });
 
   if (error) return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto">
@@ -22,29 +30,47 @@ export default async function ReportsPage() {
   const bestSellers = {};
   const monthlySales = {};
 
-  orders?.forEach((order) => {
-    const orderDate = new Date(order.created_at);
-    const amount = Number(order.total_amount) || 0;
-    const qty = Number(order.quantity) || 0;
-    const productName = order.product_name || 'ไม่ระบุชื่อสินค้า';
+ orders?.forEach((order) => {
 
-    const compareDate = new Date(order.created_at);
-    compareDate.setHours(0, 0, 0, 0);
+  const orderDate = new Date(order.created_at);
 
-    if (compareDate.getTime() === today.getTime()) {
+  const compareDate = new Date(order.created_at);
+  compareDate.setHours(0, 0, 0, 0);
+
+  const isToday = compareDate.getTime() === today.getTime();
+
+  const monthYear = orderDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+
+  order.order_items?.forEach((item) => {
+
+    const amount = Number(item.price) * Number(item.quantity);
+    const qty = Number(item.quantity) || 0;
+    const productName = item.product_name || 'ไม่ระบุชื่อสินค้า';
+
+    // วันนี้
+    if (isToday) {
       todayTotalAmount += amount;
+
       todayItems.push({
         name: productName,
         qty: qty,
         price: amount,
-        time: orderDate.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
+        time: orderDate.toLocaleTimeString('th-TH', {
+          hour: '2-digit',
+          minute: '2-digit'
+        })
       });
     }
 
-    const monthYear = orderDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    // รายเดือน
     monthlySales[monthYear] = (monthlySales[monthYear] || 0) + amount;
+
+    // สินค้าขายดี
     bestSellers[productName] = (bestSellers[productName] || 0) + qty;
+
   });
+
+});
 
   const bestSellersArray = Object.entries(bestSellers).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const monthlySalesArray = Object.entries(monthlySales).reverse();

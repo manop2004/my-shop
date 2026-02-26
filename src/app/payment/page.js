@@ -72,14 +72,30 @@ export default function PaymentPage() {
       }
 
       // 2. ตรวจสอบเงื่อนไข: ยอดเงินตรงไหม? 
-      const slipAmount = slipResult.data.amount; 
-      const transactionId = slipResult.data.transRef; 
+      const slipAmount = Number(slipResult.data.amount);
+const transactionId = slipResult.data.transRef;
 
-      if (slipAmount < totalPrice) {
-        alert(`❌ ยอดเงินไม่ถูกต้อง (ยอดสั่งซื้อ ${totalPrice} บาท แต่สลิปโอนมา ${slipAmount} บาท)`);
-        setIsProcessing(false);
-        return;
-      }
+// ดึงข้อมูลบัญชีผู้รับจากสลิป
+const receiverAccount = slipResult.data.receiver?.account?.number;
+const receiverName = slipResult.data.receiver?.account?.name;
+
+// ✅ 1. ยอดต้องตรงเป๊ะ
+if (slipAmount !== Number(totalPrice)) {
+  alert(
+    `❌ ยอดเงินไม่ถูกต้อง\n\nยอดสั่งซื้อ: ${totalPrice} บาท\nยอดที่โอน: ${slipAmount} บาท`
+  );
+  setIsProcessing(false);
+  return;
+}
+
+// ✅ 2. บัญชีผู้รับต้องเป็นของร้านเท่านั้น
+if (receiverAccount !== PROMPTPAY_ID) {
+  alert(
+    `❌ บัญชีผู้รับไม่ถูกต้อง\n\nสลิปนี้โอนไปที่: ${receiverAccount}\nกรุณาโอนเข้าบัญชีร้านเท่านั้น`
+  );
+  setIsProcessing(false);
+  return;
+}
 
       // 3. ตรวจสอบสลิปซ้ำ 
       const { data: existingOrder } = await supabase
