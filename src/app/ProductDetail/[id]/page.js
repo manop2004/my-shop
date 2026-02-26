@@ -28,6 +28,37 @@ export default function ProductDetail() {
   // --- State สำหรับ Popup แจ้งเตือนเพิ่มลงตะกร้า ---
   const [showToast, setShowToast] = useState(false);
 
+  // 🌟 เพิ่ม State สำหรับ User 🌟
+  const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState("");
+
+  // 🌟 ดึงข้อมูล User และชื่อเมื่อโหลดหน้า 🌟
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        let name = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
+        
+        if (!name) {
+          try {
+            const { data } = await supabase
+              .from('members')
+              .select('full_name') 
+              .eq('email', session.user.email)
+              .single();
+            if (data && data.full_name) name = data.full_name;
+          } catch (error) {
+            console.log("Could not fetch name from members");
+          }
+        }
+        setUserName(name || session.user.email);
+      }
+    };
+    fetchUser();
+  }, []);
+
   // --- ดึงข้อมูลตะกร้าที่เคยเซฟไว้ใน localStorage มาแสดง ---
   useEffect(() => {
     const savedCart = localStorage.getItem('cartItems');
@@ -97,9 +128,26 @@ export default function ProductDetail() {
       setQuantity((prev) => prev - 1); 
     }
   };
+
+  // 🌟 ฟังก์ชันเช็กก่อนเปิดตะกร้า 🌟
+  const handleOpenCart = () => {
+    if (user) {
+      setIsCartOpen(true);
+    } else {
+      alert("กรุณาเข้าสู่ระบบก่อนใช้งานตะกร้าสินค้านะครับ");
+      router.push("/login");
+    }
+  };
   
   // --- ฟังก์ชันจัดการตะกร้า ---
   const handleAddToCart = () => {
+    // 🌟 เช็กการล็อกอิน: ถ้ายังไม่ล็อกอินให้ไปหน้า Login ทันที
+    if (!user) {
+      alert("กรุณาเข้าสู่ระบบก่อนเพิ่มสินค้าลงตะกร้านะครับ");
+      router.push("/login");
+      return;
+    }
+
     // 🌟 เช็กสต็อก: ถ้าสินค้าหมดให้หยุดทันที
     if (!product || product.stock === 0) return;
 
@@ -216,7 +264,7 @@ export default function ProductDetail() {
               <span className="font-medium">หน้าแรก</span>
             </div>
             <div onClick={() => { router.back(); setIsSidebarOpen(false); }} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-3 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
-              <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
               <span className="font-medium">สินค้าทั้งหมด</span>
             </div>
           </nav>
@@ -347,12 +395,16 @@ export default function ProductDetail() {
             <h1 className="text-xl md:text-2xl font-serif font-semibold tracking-[0.25em] text-[#C5A059] drop-shadow-sm">MUSEUM SHOP</h1>
           </div>
           <div className="flex items-center gap-4 text-gray-800">
-            <button className="hover:text-[#C5A059] transition-colors"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg></button>
+            {/* 🌟 แสดงชื่อผู้ใช้ และลิงก์ไปหน้า Profile/Login */}
+            {user && <span className="text-sm text-gray-600 font-medium hidden md:inline">{userName}</span>}
+            <Link href={user ? "/profile" : "/login"} className="hover:text-[#C5A059] transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            </Link>
             
             {/* --- ไอคอนตะกร้า + ตัวเลขแจ้งเตือน (สีทองตามแบบ) --- */}
-            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-[#C5A059] transition-colors">
+            <button onClick={handleOpenCart} className="relative hover:text-[#C5A059] transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-              {totalCartItems > 0 && (
+              {totalCartItems > 0 && user && (
                 <span className="absolute -top-1.5 -right-2 bg-[#C5A059] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border-2 border-white shadow-sm">
                   {totalCartItems}
                 </span>

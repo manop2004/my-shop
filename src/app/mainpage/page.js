@@ -11,23 +11,21 @@ export default function ShopPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState(null);
-  const [userName, setUserName] = useState(""); // 🌟 เพิ่ม State สำหรับเก็บชื่อ
+  const [userName, setUserName] = useState(""); 
 
   useEffect(() => {
     const fetchUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
 
-      // 🌟 ดึงชื่อผู้ใช้มาแสดง
       if (session?.user) {
         let name = session.user.user_metadata?.full_name || session.user.user_metadata?.name;
         
-        // ถ้าใน auth ไม่มีชื่อ ลองดึงจากตาราง members มาเสริม
         if (!name) {
           try {
             const { data } = await supabase
               .from('members')
-              .select('full_name') // 📌 ถ้าในตารางตั้งชื่อคอลัมน์ว่า name ให้แก้ตรงนี้เป็น name ครับ
+              .select('full_name') 
               .eq('email', session.user.email)
               .single();
             if (data && data.full_name) name = data.full_name;
@@ -35,22 +33,18 @@ export default function ShopPage() {
             console.log("Could not fetch name from members");
           }
         }
-        // เซ็ตชื่อ ถ้าไม่มีชื่อจริงๆ ค่อยดึงอีเมลมาโชว์แทน
         setUserName(name || session.user.email);
       }
     };
     fetchUser();
   }, []);
 
-  // --- เพิ่ม State สำหรับ Sidebar เมนูด้านซ้าย ---
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  // --- เพิ่ม State สำหรับตะกร้าสินค้า (Cart) ---
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
 
-  // --- ดึงข้อมูลตะกร้าที่เคยเซฟไว้ใน localStorage มาแสดง ---
   useEffect(() => {
     const savedCart = localStorage.getItem('cartItems');
     if (savedCart) {
@@ -63,25 +57,21 @@ export default function ShopPage() {
     setIsCartLoaded(true); 
   }, []);
 
-  // --- อัปเดตตะกร้าลง localStorage อัตโนมัติ ---
   useEffect(() => {
     if (isCartLoaded) {
       localStorage.setItem('cartItems', JSON.stringify(cartItems));
     }
   }, [cartItems, isCartLoaded]);
 
-  // --- ฟังก์ชันจัดการตะกร้า (🌟 อัปเกรดระบบเช็กสต็อกแล้ว) ---
   const updateCartItemQuantity = (id, delta) => {
     setCartItems((prev) =>
       prev.map((item) => {
         if (item.id === id) {
           const newQty = item.quantity + delta;
           
-          // 🌟 เช็กสต็อก: ดึงสต็อกล่าสุดจาก products state ที่โหลดมาในหน้านี้
           const realProduct = products.find(p => p.id === id);
           const currentStock = realProduct ? realProduct.stock : item.stock;
 
-          // 🌟 ถ้าพยายามกด + เกินสต็อก ให้แจ้งเตือนและหยุดการทำงาน
           if (delta > 0 && currentStock !== undefined && newQty > currentStock) {
             alert(`ไม่สามารถเพิ่มจำนวนได้! มีสินค้าในสต็อกเพียง ${currentStock} ชิ้น`);
             return item;
@@ -103,11 +93,9 @@ export default function ShopPage() {
     router.push('/checkout');
   };
 
-  // คำนวณจำนวนสินค้าและราคารวมในตะกร้า
   const totalCartItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalCartPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  // --- ดึงข้อมูลสินค้าเดิม ---
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -131,20 +119,26 @@ export default function ShopPage() {
     fetchProducts();
   }, []);
 
+  // 🌟 ฟังก์ชันเช็กก่อนเปิดตะกร้า
+  const handleOpenCart = () => {
+    if (user) {
+      setIsCartOpen(true);
+    } else {
+      alert("กรุณาเข้าสู่ระบบก่อนใช้งานตะกร้าสินค้านะครับ");
+      router.push("/login");
+    }
+  };
+
   return (
     <div className="bg-[#fdfbf7] min-h-screen font-sans text-gray-800 relative overflow-x-hidden">
       
-      {/* =========================================
-          SIDEBAR MENU (เมนูด้านซ้าย - สำหรับหน้าหลัก/ทั่วไป)
-      ========================================= */}
+      {/* SIDEBAR MENU */}
       <div 
         className={`fixed inset-0 bg-black/40 z-[60] transition-opacity duration-300 ${isSidebarOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
         onClick={() => setIsSidebarOpen(false)}
       />
       
       <aside className={`fixed top-0 left-0 h-full w-80 bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
-        
-        {/* ส่วนหัวเมนู */}
         <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-white">
           <h2 className="text-[#C5A059] font-serif text-lg tracking-widest">MENU</h2>
           <button onClick={() => setIsSidebarOpen(false)} className="text-gray-400 hover:text-[#C5A059] transition-colors p-2 -mr-2 rounded-full hover:bg-gray-50">
@@ -152,52 +146,39 @@ export default function ShopPage() {
           </button>
         </div>
 
-        {/* ส่วนเนื้อหาเมนู */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8 bg-white">
-          
-          {/* 1. เมนูหลัก (ใส่ไอคอนเพิ่มความน่าสนใจ) */}
           <div>
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Navigation</div>
             <nav className="flex flex-col gap-2">
-              <div onClick={() => { /* router.push('/'); */ setIsSidebarOpen(false); }} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-2 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
+              <div onClick={() => setIsSidebarOpen(false)} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-2 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
                 <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
                 <span className="font-medium">หน้าแรก</span>
               </div>
-              <div onClick={() => { /* router.push('/products'); */ setIsSidebarOpen(false); }} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-2 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
+              <div onClick={() => setIsSidebarOpen(false)} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-2 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
                 <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                 <span className="font-medium">สินค้าทั้งหมด</span>
               </div>
             </nav>
           </div>
-
           <hr className="border-gray-100" />
-
-          {/* 2. หมวดหมู่สินค้า (จำลองขึ้นมาเพื่อเติมพื้นที่) */}
           <div>
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Categories</div>
             <nav className="flex flex-col gap-4 text-[15px] text-gray-600 pl-3 border-l-2 border-gray-100">
               <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>งานเซรามิก</span>
-                <span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
+                <span>งานเซรามิก</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
               </div>
               <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>งานไม้ประยุกต์</span>
-                <span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
+                <span>งานไม้ประยุกต์</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
               </div>
               <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>งานจักสาน</span>
-                <span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
+                <span>งานจักสาน</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
               </div>
               <div className="hover:text-[#C5A059] cursor-pointer transition-colors flex justify-between items-center group">
-                <span>ของที่ระลึก</span>
-                <span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
+                <span>ของที่ระลึก</span><span className="text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pr-2">&rarr;</span>
               </div>
             </nav>
           </div>
-
           <hr className="border-gray-100" />
-
-          {/* 3. ข้อมูลอื่นๆ */}
           <div>
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Information</div>
             <nav className="flex flex-col gap-3 text-[14px] text-gray-500 pl-3 border-l-2 border-gray-100">
@@ -206,31 +187,19 @@ export default function ShopPage() {
               <a href="#" className="hover:text-[#C5A059] transition-colors">ติดต่อเรา</a>
             </nav>
           </div>
-
         </div>
-
-        {/* ส่วนท้ายเมนู (Footer) เติมเต็มพื้นที่ด้านล่างสุด */}
         <div className="p-6 border-t border-gray-100 bg-[#faf9f7]">
-          <div className="text-center text-xs text-gray-400 mb-4 font-serif tracking-widest">
-            MUSEUM SHOP
-          </div>
-          <div className="flex justify-center gap-6 text-gray-400">
-            <svg className="w-5 h-5 hover:text-[#C5A059] cursor-pointer transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
-            <svg className="w-5 h-5 hover:text-[#C5A059] cursor-pointer transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
-          </div>
+          <div className="text-center text-xs text-gray-400 mb-4 font-serif tracking-widest">MUSEUM SHOP</div>
         </div>
       </aside>
 
-      {/* =========================================
-          CART SIDEBAR (ตะกร้าสินค้าด้านขวา)
-      ========================================= */}
+      {/* CART SIDEBAR */}
       <div 
         className={`fixed inset-0 bg-black/40 z-[60] transition-opacity duration-300 ${isCartOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
         onClick={() => setIsCartOpen(false)}
       />
 
       <aside className={`fixed top-0 right-0 h-full w-80 sm:w-96 bg-white z-[70] shadow-2xl transform transition-transform duration-300 ease-in-out flex flex-col ${isCartOpen ? "translate-x-0" : "translate-x-full"}`}>
-        {/* Cart Header */}
         <div className="p-6 flex justify-between items-center border-b border-gray-100">
           <h2 className="text-xl font-sans text-[#C5A059] tracking-wider">ตะกร้าของคุณ</h2>
           <button onClick={() => setIsCartOpen(false)} className="text-gray-400 hover:text-gray-800 transition-colors">
@@ -238,7 +207,6 @@ export default function ShopPage() {
           </button>
         </div>
         
-        {/* Cart Items */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-gray-50/50">
           {cartItems.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
@@ -249,13 +217,11 @@ export default function ShopPage() {
             cartItems.map(item => (
               <div key={item.id} className="border border-gray-100 rounded-2xl p-5 bg-white shadow-sm relative transition-all hover:shadow-md">
                 <h3 className="font-bold text-gray-800 mb-2 leading-tight pr-6">{item.name}</h3>
-                
                 <div className="text-sm text-gray-500 space-y-1 mb-4">
                   <p>จำนวน: {item.quantity} ชิ้น</p>
                   <p>ราคา: {Number(item.price).toLocaleString()} บาท</p>
                   <p className="text-[#C5A059] font-medium pt-1">รวม: {(item.price * item.quantity).toLocaleString()} บาท</p>
                 </div>
-                
                 <div className="flex items-center justify-between border-t border-gray-50 pt-4">
                   <div className="flex items-center border border-gray-200 rounded-lg overflow-hidden h-9 w-24">
                     <button onClick={() => updateCartItemQuantity(item.id, -1)} className="w-8 h-full hover:bg-gray-50 text-gray-600 flex items-center justify-center transition-colors">-</button>
@@ -271,7 +237,6 @@ export default function ShopPage() {
           )}
         </div>
         
-        {/* Cart Footer / Checkout */}
         {cartItems.length > 0 && (
           <div className="p-6 bg-white border-t border-gray-100 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.05)]">
             <div className="flex justify-between items-center mb-5">
@@ -290,39 +255,31 @@ export default function ShopPage() {
         )}
       </aside>
 
-      {/* =========================================
-          NAVBAR (แถบด้านบน)
-      ========================================= */}
+      {/* NAVBAR */}
       <nav className="bg-white border-b border-[#e8dcc4] sticky top-0 z-50 shadow-sm">
         <div className="max-w-[1300px] mx-auto px-6 h-[70px] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* 👇 เพิ่มไอคอนสามขีด (Hamburger Menu) ตรงนี้ 👇 */}
             <button onClick={() => setIsSidebarOpen(true)} className="text-gray-800 hover:text-[#C5A059] transition-colors mr-2">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </button>
-
             <h1 className="text-xl md:text-2xl font-serif font-bold tracking-[0.15em] text-[#C5A059] drop-shadow-sm">MUSEUM SHOP</h1>
             <span className="text-gray-300 hidden md:inline">|</span>
             <span className="text-sm font-medium tracking-wide text-gray-500 hidden md:inline">ช้อปปิ้งออนไลน์</span>
           </div>
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-  {/* 🌟 ถ้ามี user ให้โชว์ชื่อแทน email แล้วครับ 🌟 */}
-  {user && <span className="text-sm text-gray-600 font-medium">{userName}</span>}
-  
-  <Link href={user ? "/profile" : "/login"} className="hover:text-[#C5A059] transition-colors">
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-  </svg>
-</Link>
-</div>
+              {user && <span className="text-sm text-gray-600 font-medium">{userName}</span>}
+              <Link href={user ? "/profile" : "/login"} className="hover:text-[#C5A059] transition-colors">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                </svg>
+              </Link>
+            </div>
             
-           
-            
-            {/* --- ไอคอนตะกร้าบน Navbar --- */}
-            <button onClick={() => setIsCartOpen(true)} className="relative hover:text-[#C5A059] transition-colors text-gray-800" title="ตะกร้าสินค้า">
+            {/* 🌟 ปรับปรุงปุ่มตะกร้าตรงนี้ 🌟 */}
+            <button onClick={handleOpenCart} className="relative hover:text-[#C5A059] transition-colors text-gray-800" title="ตะกร้าสินค้า">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
-              {totalCartItems > 0 && (
+              {totalCartItems > 0 && user && ( // ซ่อนตัวเลขตะกร้าถ้ายังไม่ล็อกอิน
                 <span className="absolute -top-1.5 -right-2 bg-[#C5A059] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center border-2 border-white shadow-sm">
                   {totalCartItems}
                 </span>
@@ -332,9 +289,7 @@ export default function ShopPage() {
         </div>
       </nav>
 
-      {/* =========================================
-          MAIN CONTENT (เนื้อหาหลัก)
-      ========================================= */}
+      {/* MAIN CONTENT */}
       <section className="py-16 px-6">
         <div className="max-w-[1300px] mx-auto">
           <div className="mb-12 flex justify-between items-end border-b border-[#e8dcc4] pb-4">
@@ -347,7 +302,6 @@ export default function ShopPage() {
             </div>
           </div>
 
-          {/* ส่วนแสดงผลข้อมูล */}
           {loading ? (
             <div className="text-center py-20 text-gray-500 font-medium text-lg">
               กำลังโหลดสินค้า... ⏳
@@ -394,7 +348,6 @@ export default function ShopPage() {
               ))}
             </div>
           )}
-          
         </div>
       </section>
 

@@ -1,184 +1,208 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
-import { supabase } from '@/utils/supabase'; // 🌟 นำเข้า Supabase
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { supabase } from '@/utils/supabase';
+import generatePayload from 'promptpay-qr';
+import { QRCodeSVG } from 'qrcode.react';
 
-function PaymentContent() {
-  const searchParams = useSearchParams();
+export default function PaymentPage() {
   const router = useRouter();
-
-  // รับค่าจาก URL ที่ส่งมาจากหน้า Checkout
-  const method = searchParams.get("method") || "promptpay";
-  const amountParam = searchParams.get("amount");
-  const amount = amountParam ? Number(amountParam) : 0;
-
-  // 🌟 เพิ่ม State สำหรับจัดการข้อมูลตะกร้าและสถานะการประมวลผล
+  
+  const [formData, setFormData] = useState(null);
   const [cartItems, setCartItems] = useState([]);
+  const [totalPrice, setTotalPrice] = useState(0);
+  
+  const [slipImage, setSlipImage] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  // 🌟 ดึงข้อมูลตะกร้าสินค้าจาก localStorage
-  useEffect(() => {
-    const savedCart = localStorage.getItem('cartItems');
-    if (savedCart) {
-      try {
-        setCartItems(JSON.parse(savedCart));
-      } catch (error) {
-        console.error("Error parsing cart:", error);
-      }
-    }
-  }, []);
+  // ข้อมูลพร้อมเพย์ของคุณ
+  const PROMPTPAY_ID = "0639930853"; 
 
-  // 🌟 ฟังก์ชันยืนยันการชำระเงิน พร้อมเช็กและตัดสต็อก
-  const handlePaymentConfirm = async () => {
-    if (cartItems.length === 0) {
-      alert("ไม่พบข้อมูลสินค้าให้ตัดสต็อก แต่จะพาไปหน้าถัดไป");
-      router.push(`/success?amount=${amount}`);
+  // 🔑 นำ API Key ของ EasySlip มาใส่ตรงนี้ครับ
+  const EASYSLIP_API_KEY = "8c52aa84-fdd8-4696-b3bb-fb03822f9af8"; 
+
+  useEffect(() => {
+    const savedForm = sessionStorage.getItem("checkoutFormData");
+    const savedCart = localStorage.getItem("cartItems");
+    
+    if (!savedForm || !savedCart) {
+      alert("ไม่พบข้อมูลคำสั่งซื้อ กรุณาทำรายการใหม่");
+      router.push("/checkout");
+      return;
+    }
+
+    const parsedCart = JSON.parse(savedCart);
+    setFormData(JSON.parse(savedForm));
+    setCartItems(parsedCart);
+    
+    const total = parsedCart.reduce((sum, item) => sum + (Number(item.price) * item.quantity), 0);
+    setTotalPrice(total);
+  }, [router]);
+
+  const qrPayload = generatePayload(PROMPTPAY_ID, { amount: totalPrice });
+
+  const handleConfirmPayment = async () => {
+    if (!slipImage) {
+      alert("กรุณาอัปโหลดสลิปโอนเงินครับ");
       return;
     }
 
     setIsProcessing(true);
 
     try {
-      // 1️⃣ เช็กสต็อกล่าสุดอีกครั้ง ป้องกันคนซื้อตัดหน้าตอนกำลังโอนเงิน
-      for (const item of cartItems) {
-        const { data: product, error: fetchError } = await supabase
-          .from("products")
-          .select("stock, name")
-          .eq("id", item.id)
-          .single();
+      // 1. ยิง API ตรวจสลิปด้วย EasySlip
+      const apiFormData = new FormData();
+      apiFormData.append('file', slipImage);
 
-        if (fetchError || !product) {
-          throw new Error(`ไม่พบข้อมูลสินค้า: ${item.name}`);
-        }
-
-        if (product.stock < item.quantity) {
-          throw new Error(`ขออภัย สินค้า "${item.name}" มีสต็อกไม่พอ (เหลือเพียง ${product.stock} ชิ้น) กรุณาแก้ไขคำสั่งซื้อ`);
-        }
-      }
-
-      // 2️⃣ ถ้าสต็อกพอทุกชิ้น ให้ทำการ "ตัดสต็อก" ในฐานข้อมูล
-      for (const item of cartItems) {
-        // ดึงสต็อกล่าสุดเพื่อความชัวร์ที่สุด
-        const { data: product } = await supabase
-          .from("products")
-          .select("stock")
-          .eq("id", item.id)
-          .single();
-          
-        const newStock = product.stock - item.quantity;
-        
-        const { error: updateError } = await supabase
-          .from("products")
-          .update({ stock: newStock })
-          .eq("id", item.id);
-
-        if (updateError) {
-          throw new Error(`เกิดข้อผิดพลาดในการตัดสต็อก: ${item.name}`);
-        }
-      }
-
-      // 3️⃣ ล้างตะกร้าสินค้าออกเมื่อจ่ายเงินและตัดสต็อกสำเร็จ
-      localStorage.removeItem('cartItems');
-
-      // 4️⃣ ดำเนินการไปหน้า Success 
-      router.push(`/success?amount=${amount}`);
+      const response = await fetch('https://developer.easyslip.com/api/v1/verify', {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${EASYSLIP_API_KEY}` 
+        },
+        body: apiFormData
+      });
       
+      const slipResult = await response.json();
+
+      if (slipResult.status !== 200) {
+        alert(`❌ สแกนสลิปไม่ผ่าน: ${slipResult.message || 'กรุณาลองอัปโหลดรูปใหม่อีกครั้ง'}`);
+        setIsProcessing(false);
+        return;
+      }
+
+      // 2. ตรวจสอบเงื่อนไข: ยอดเงินตรงไหม? 
+      const slipAmount = slipResult.data.amount; 
+      const transactionId = slipResult.data.transRef; 
+
+      if (slipAmount < totalPrice) {
+        alert(`❌ ยอดเงินไม่ถูกต้อง (ยอดสั่งซื้อ ${totalPrice} บาท แต่สลิปโอนมา ${slipAmount} บาท)`);
+        setIsProcessing(false);
+        return;
+      }
+
+      // 3. ตรวจสอบสลิปซ้ำ 
+      const { data: existingOrder } = await supabase
+        .from('orders')
+        .select('transaction_id')
+        .eq('transaction_id', transactionId)
+        .single();
+
+      if (existingOrder) {
+        alert("❌ สลิปนี้ถูกใช้งานไปแล้วในระบบ กรุณาใช้สลิปที่โอนใหม่ครับ");
+        setIsProcessing(false);
+        return;
+      }
+
+      // 4. อัปโหลดรูปสลิปลง Supabase Storage ('slips' bucket)
+      const fileExt = slipImage.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('slips')
+        .upload(`public/${fileName}`, slipImage);
+
+      if (uploadError) throw uploadError;
+      const slipUrl = supabase.storage.from('slips').getPublicUrl(`public/${fileName}`).data.publicUrl;
+
+      // 5. บันทึกข้อมูลลงตาราง orders 
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert([{
+          customer_name: formData.name,
+          phone: formData.phone,
+          address: formData.address,
+          total_price: totalPrice,
+          slip_url: slipUrl,
+          transaction_id: transactionId, 
+          status: 'paid' 
+        }])
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // 6. บันทึกสินค้ารายชิ้นลงตาราง order_items
+      const orderItemsData = cartItems.map(item => ({
+        order_id: orderData.id,
+        product_id: item.id,
+        product_name: item.name,
+        quantity: item.quantity,
+        price: item.price
+      }));
+
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItemsData);
+      if (itemsError) throw itemsError;
+
+      // 7. ตัดสต็อกสินค้าในตาราง products 
+      for (const item of cartItems) {
+        const { data: currentProduct, error: fetchError } = await supabase
+          .from('products')
+          .select('stock')
+          .eq('id', item.id)
+          .single();
+
+        if (currentProduct && !fetchError) {
+          const newStock = currentProduct.stock - item.quantity;
+          
+          const { error: updateError } = await supabase
+            .from('products')
+            .update({ stock: newStock < 0 ? 0 : newStock })
+            .eq('id', item.id);
+
+          if (updateError) {
+            console.error(`ไม่สามารถตัดสต็อกสินค้า ID: ${item.id} ได้`, updateError);
+          }
+        }
+      }
+
+      // 8. ล้างตะกร้าและข้อมูลทิ้ง
+      localStorage.removeItem("cartItems");
+      sessionStorage.removeItem("checkoutFormData");
+      
+      // 9. ส่งไปหน้า Success 
+      router.push(`/success?order_id=${orderData.id}`);
+
     } catch (error) {
-      alert(error.message);
+      console.error("Payment Error:", error);
+      alert("เกิดข้อผิดพลาดในการตรวจสอบข้อมูล กรุณาลองใหม่อีกครั้ง");
     } finally {
       setIsProcessing(false);
     }
   };
 
+  if (!formData) return <div className="min-h-screen flex items-center justify-center text-[#C5A059]">กำลังโหลดข้อมูล...</div>;
+
   return (
-    <div className="min-h-screen bg-[#FAF8F5] flex flex-col items-center justify-center p-4 font-sans text-zinc-800">
-      <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center border border-gray-100">
-        
-        <h1 className="text-2xl font-sans text-[#C5A059] mb-2 tracking-wide">
-          {method === "promptpay" ? "สแกน QR Code เพื่อชำระเงิน" : "ชำระเงินด้วยบัตรเครดิต"}
-        </h1>
-        <p className="text-gray-500 mb-6 text-sm">กรุณาชำระเงินภายใน 15 นาที</p>
-
-        {/* ยอดเงินที่ต้องชำระ */}
-        <div className="bg-[#FAF8F5] p-4 rounded-md mb-6 border border-gray-50">
-          <p className="text-sm text-gray-600 mb-1">ยอดชำระสุทธิ</p>
-          <p className="text-3xl font-bold text-[#C5A059]">฿{amount.toLocaleString()}</p>
-        </div>
-
-        {method === "promptpay" ? (
-          <div className="flex justify-center mb-6">
-            <div className="w-48 h-48 bg-gray-100 border border-gray-200 flex items-center justify-center rounded-md p-2">
-              <img 
-                src="https://upload.wikimedia.org/wikipedia/commons/d/d0/QR_code_for_mobile_English_Wikipedia.svg" 
-                alt="PromptPay QR Code"
-                className="w-full h-full object-cover mix-blend-multiply opacity-80" 
-              />
-            </div>
-          </div>
-        ) : (
-          <div className="text-left space-y-4 mb-6">
-            <div>
-              <label className="block text-sm text-gray-600 mb-1">หมายเลขบัตร</label>
-              <input type="text" placeholder="XXXX XXXX XXXX XXXX" className="w-full border border-gray-200 p-2 rounded-sm focus:outline-none focus:border-[#C5A059] transition" />
-            </div>
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <label className="block text-sm text-gray-600 mb-1">วันหมดอายุ</label>
-                <input type="text" placeholder="MM/YY" className="w-full border border-gray-200 p-2 rounded-sm focus:outline-none focus:border-[#C5A059] transition" />
-              </div>
-              <div className="w-1/2">
-                <label className="block text-sm text-gray-600 mb-1">CVV</label>
-                <input type="text" placeholder="123" className="w-full border border-gray-200 p-2 rounded-sm focus:outline-none focus:border-[#C5A059] transition" />
-              </div>
-            </div>
-          </div>
-        )}
-
-        <hr className="my-8 border-gray-100" />
-
-        <div className="flex flex-col gap-3">
-          {/* 🌟 ปรับปรุงปุ่มแจ้งชำระเงิน */}
-          <button 
-            onClick={handlePaymentConfirm}
-            disabled={isProcessing}
-            className={`w-full flex justify-center items-center py-3 rounded-sm font-medium transition-colors shadow-sm ${
-              isProcessing 
-                ? 'bg-gray-400 text-white cursor-not-allowed' 
-                : 'bg-[#C5A059] text-white hover:bg-[#B38E46]'
-            }`}
-          >
-            {isProcessing ? (
-              <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                กำลังดำเนินการ...
-              </>
-            ) : (
-              'แจ้งชำระเงินเรียบร้อย'
-            )}
-          </button>
-          
-          <button 
-            onClick={() => router.back()}
-            disabled={isProcessing}
-            className="w-full text-gray-400 py-2 hover:text-[#C5A059] transition-colors text-sm font-medium underline underline-offset-4 decoration-gray-200 hover:decoration-[#C5A059] disabled:opacity-50"
-          >
-            ย้อนกลับไปแก้ไขข้อมูล
-          </button>
-        </div>
-
+    <div className="max-w-md mx-auto mt-10 p-6 bg-white shadow-lg rounded-xl">
+      <h1 className="text-2xl font-bold text-center mb-6 text-[#C5A059]">ชำระเงิน (PromptPay)</h1>
+      
+      <div className="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-xl mb-6 border border-gray-200">
+        <QRCodeSVG value={qrPayload} size={200} />
+        <p className="mt-4 font-medium text-lg">ยอดที่ต้องชำระ: <span className="text-[#C5A059] font-bold">฿{totalPrice.toLocaleString()}</span></p>
+        <p className="text-sm text-gray-500 mt-2">แสกนด้วยแอปธนาคารใดก็ได้</p>
       </div>
-    </div>
-  );
-}
 
-export default function PaymentPage() {
-  return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center text-[#C5A059] bg-[#FAF8F5]">กำลังโหลด...</div>}>
-      <PaymentContent />
-    </Suspense>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">อัปโหลดสลิปโอนเงิน</label>
+        <input 
+          type="file" 
+          accept="image/*"
+          onChange={(e) => setSlipImage(e.target.files[0])}
+          className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#C5A059] file:text-white hover:file:bg-[#b38e46]"
+        />
+      </div>
+
+      {/* 🌟 ปุ่มกดสีทองอร่ามอยู่ตรงนี้ครับ! อย่าลืมก๊อปปี้ให้ถึงบรรทัดล่างสุดนะครับ 🌟 */}
+      <button 
+        onClick={handleConfirmPayment}
+        disabled={isProcessing}
+        className={`w-full py-3 rounded-lg font-bold text-white transition-colors ${
+          isProcessing ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#C5A059] hover:bg-[#b38e46]'
+        }`}
+      >
+        {isProcessing ? 'กำลังตรวจสอบสลิปและบันทึก...' : 'แจ้งชำระเงินเรียบร้อย'}
+      </button>
+
+    </div>
   );
 }

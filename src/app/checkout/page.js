@@ -81,7 +81,7 @@ function CheckoutContent() {
         }
       }
 
-      // 2️⃣ ถ้าสต็อกพอ ให้พาไปหน้า Payment ทันที (ย้ายการตัดสต็อกไปไว้หน้า Payment แทนแล้ว)
+      // 2️⃣ ถ้าสต็อกพอ ให้พาไปหน้า Payment ทันที (ย้ายการตัดสต็อกและบันทึก DB ไปไว้หน้า Payment)
       sessionStorage.setItem("checkoutFormData", JSON.stringify(formData));
       
       const orderIds = cartItems.map(item => item.id).join(',');
