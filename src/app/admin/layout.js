@@ -46,6 +46,7 @@ export default function AdminLayout({ children }) {
             <li><Link href="/admin/orders" className={getMenuClass('/admin/orders')} onClick={() => setIsMobileMenuOpen(false)}><span className="mr-3 text-lg">📜</span> ออเดอร์</Link></li>
             <li><Link href="/admin/members" className={getMenuClass('/admin/members')} onClick={() => setIsMobileMenuOpen(false)}><span className="mr-3 text-lg">👥</span> สมาชิก</Link></li>
             <li><Link href="/admin/reports" className={getMenuClass('/admin/reports')} onClick={() => setIsMobileMenuOpen(false)}><span className="mr-3 text-lg">📊</span> รายงาน</Link></li>
+            <li><Link href="/admin/inquiries" className={getMenuClass('/admin/inquiries')} onClick={() => setIsMobileMenuOpen(false)}><span className="mr-3 text-lg">📩</span> ข้อความสอบถาม</Link></li>
           </ul>
         </nav>
       </aside>
