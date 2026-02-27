@@ -163,7 +163,7 @@ export default function ShopPage() {
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Information</div>
             <nav className="flex flex-col gap-3 text-[14px] text-gray-500 pl-3 border-l-2 border-gray-100">
               <a href="/read" className="hover:text-[#C5A059] transition-colors">เกี่ยวกับศูนย์ศิลปาชีพฯ</a>
-              <a href="#" className="hover:text-[#C5A059] transition-colors">ติดต่อเรา</a>
+              <a href="/Inquiryform" className="hover:text-[#C5A059] transition-colors">ติดต่อเรา</a>
             </nav>
           </div>
         </div>

@@ -199,17 +199,25 @@ function CheckoutContent() {
             <h2 className="text-xl font-medium mb-6 border-b pb-4">ข้อมูลการจัดส่ง</h2>
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-1">ชื่อ-นามสกุล</label>
-                <input
-                  type="text"
-                  name="name"
-                  required
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-sm px-4 py-2 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition"
-                  placeholder="กรุณากรอกชื่อ-นามสกุล"
-                />
-              </div>
+  <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+    ชื่อ-นามสกุล
+  </label>
+  <input
+    type="text"
+    id="name"
+    name="name"
+    value={formData.name}
+    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+    maxLength={25} /* 👈 ล็อกไว้ที่ 25 ตัวอักษร */
+    required
+    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:border-transparent transition-colors"
+    placeholder="กรอกชื่อ-นามสกุล"
+  />
+  {/* ตัวนับจำนวนตัวอักษร */}
+  <div className="text-right text-xs text-gray-400 mt-1">
+    {formData.name.length}/25
+  </div>
+</div>
               
               <div>
                 <label className="block text-sm text-gray-600 mb-1">เบอร์โทรศัพท์</label>
@@ -226,17 +234,25 @@ function CheckoutContent() {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1">ที่อยู่จัดส่ง</label>
-                <textarea
-                  name="address"
-                  required
-                  rows="4"
-                  value={formData.address}
-                  onChange={handleInputChange}
-                  className="w-full border border-gray-300 rounded-sm px-4 py-2 focus:outline-none focus:border-[#C5A059] focus:ring-1 focus:ring-[#C5A059] transition resize-none"
-                  placeholder="บ้านเลขที่, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์"
-                ></textarea>
-              </div>
+  <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
+    ที่อยู่จัดส่ง
+  </label>
+  <textarea
+    id="address"
+    name="address"
+    value={formData.address}
+    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+    maxLength={50} /* 👈 ล็อกไว้ที่ 50 ตัวอักษร */
+    required
+    rows="3"
+    className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#C5A059] focus:border-transparent transition-colors resize-none"
+    placeholder="บ้านเลขที่, ซอย, ถนน, ตำบล, อำเภอ, จังหวัด, รหัสไปรษณีย์"
+  ></textarea>
+  {/* ตัวนับจำนวนตัวอักษร */}
+  <div className="text-right text-xs text-gray-400 mt-1">
+    {formData.address.length}/50
+  </div>
+</div>
 
               <button
                 type="submit"
