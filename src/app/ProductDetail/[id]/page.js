@@ -416,6 +416,22 @@ export default function ProductDetail() {
 
       {/* --- Main Content --- */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-12">
+
+{/* --- ปุ่มกลับสู่หน้าสินค้า (Back to Products) --- */}
+<div className="mb-6 flex items-center">
+  <button 
+    onClick={() => router.push('/mainpage')}
+    className="group flex items-center gap-2 text-gray-400 hover:text-[#C5A059] transition-all duration-300"
+  >
+    <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-sm group-hover:border-[#C5A059] group-hover:bg-[#C5A059]/5 transition-all">
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+      </svg>
+    </div>
+    <span className="text-sm font-medium tracking-widest uppercase">Back to Collection</span>
+  </button>
+</div>
+
         <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
           
           {/* ฝั่งซ้าย: รูปภาพ */}
