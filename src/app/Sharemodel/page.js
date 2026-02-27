@@ -8,8 +8,13 @@ const ShareWork = () => {
   const [shareUrl, setShareUrl] = useState("");
 
   useEffect(() => {
-    setShareUrl(window.location.href);
-  }, []);
+  const params = new URLSearchParams(window.location.search);
+  const id = params.get("id");
+
+  if (id) {
+    setShareUrl(`${window.location.origin}/ProductDetail/${id}`);
+  }
+}, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(shareUrl);

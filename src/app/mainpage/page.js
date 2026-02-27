@@ -150,9 +150,9 @@ export default function ShopPage() {
           <div>
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Navigation</div>
             <nav className="flex flex-col gap-2">
-              <div onClick={() => setIsSidebarOpen(false)} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-2 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
-                <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-                <span className="font-medium">หน้าแรก</span>
+            <div onClick={() => { router.push('/'); setIsSidebarOpen(false); }} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-3 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
+              <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+              <span className="font-medium">หน้าแรก</span>
               </div>
               <div onClick={() => setIsSidebarOpen(false)} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-2 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
                 <svg className="w-5 h-5 text-gray-400 group-hover:text-[#C5A059] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
@@ -162,7 +162,7 @@ export default function ShopPage() {
           
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Information</div>
             <nav className="flex flex-col gap-3 text-[14px] text-gray-500 pl-3 border-l-2 border-gray-100">
-              <a href="#" className="hover:text-[#C5A059] transition-colors">เกี่ยวกับศูนย์ศิลปาชีพฯ</a>
+              <a href="/read" className="hover:text-[#C5A059] transition-colors">เกี่ยวกับศูนย์ศิลปาชีพฯ</a>
               <a href="#" className="hover:text-[#C5A059] transition-colors">ติดต่อเรา</a>
             </nav>
           </div>
@@ -281,18 +281,46 @@ export default function ShopPage() {
 
           </div>
         </nav>
-      {/* MAIN CONTENT */}
-      <section className="py-16 px-6">
-        <div className="max-w-[1300px] mx-auto">
-          <div className="mb-12 flex justify-between items-end border-b border-[#e8dcc4] pb-4">
-            <div>
-              <h2 className="text-3xl font-sans text-gray-900 font-bold">สินค้าทั้งหมด</h2>
-              <p className="text-gray-500 mt-2 text-sm">เลือกชมงานฝีมือสุดประณีตจากช่างศิลป์</p>
-            </div>
-            <div className="text-sm text-gray-500 hidden sm:block">
-              พบ {products.length} รายการ
-            </div>
+
+{/* MAIN CONTENT */}
+<section className="py-16 px-6">
+  <div className="max-w-[1300px] mx-auto">
+    {/* ปรับปรุง Container หลักให้ใช้ grid เพื่อแบ่งพื้นที่ 3 ส่วนเท่าๆ กัน */}
+    <div className="mb-12 grid grid-cols-1 md:grid-cols-3 items-center border-b border-[#e8dcc4] pb-8 gap-6">
+      
+      {/* 1. ฝั่งซ้าย: ปุ่ม Back to Collection */}
+      <div className="flex justify-start order-2 md:order-1">
+        <button 
+          onClick={() => router.push('/')}
+          className="group flex items-center gap-3 text-gray-400 hover:text-[#C5A059] transition-all duration-300"
+        >
+          <div className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-white shadow-sm group-hover:border-[#C5A059] group-hover:bg-[#C5A059]/5 transition-all">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
+            </svg>
           </div>
+          <span className="text-[11px] font-bold tracking-[0.2em] uppercase">Back to Collection</span>
+        </button>
+      </div>
+
+      {/* 2. ตรงกลาง: หัวข้อ และ คำอธิบาย (จัดให้อยู่ใน div เดียวกันเพื่อให้ซ้อนกัน) */}
+      <div className="text-center order-1 md:order-2">
+        <h2 className="text-3xl font-sans text-gray-900 font-bold leading-tight">
+          สินค้าทั้งหมด
+        </h2>
+        <p className="text-gray-500 mt-2 text-sm">
+          เลือกชมงานฝีมือสุดประณีตจากช่างศิลป์
+        </p>
+      </div>
+
+      {/* 3. ฝั่งขวา: จำนวนสินค้า */}
+      <div className="hidden md:flex justify-end order-3">
+        <div className="text-sm text-gray-400 font-medium">
+          พบ <span className="text-[#C5A059]">{products.length}</span> รายการ
+        </div>
+      </div>
+
+    </div>
 
           {loading ? (
             <div className="text-center py-20 text-gray-500 font-medium text-lg">

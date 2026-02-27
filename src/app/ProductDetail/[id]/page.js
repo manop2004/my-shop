@@ -416,8 +416,7 @@ export default function ProductDetail() {
 
       {/* --- Main Content --- */}
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 md:py-12">
-
-{/* --- ปุ่มกลับสู่หน้าสินค้า (Back to Products) --- */}
+        {/* --- ปุ่มกลับสู่หน้าสินค้า (Back to Products) --- */}
 <div className="mb-6 flex items-center">
   <button 
     onClick={() => router.push('/mainpage')}
@@ -431,7 +430,6 @@ export default function ProductDetail() {
     <span className="text-sm font-medium tracking-widest uppercase">Back to Collection</span>
   </button>
 </div>
-
         <div className="flex flex-col md:flex-row gap-8 lg:gap-16">
           
           {/* ฝั่งซ้าย: รูปภาพ */}
@@ -446,10 +444,39 @@ export default function ProductDetail() {
                 style={{ transform: isZoomed ? "scale(2.5)" : "scale(1)", transformOrigin: `${mousePosition.x}% ${mousePosition.y}%` }}
               />
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {gallery.map((img, index) => (
-                <button key={index} onClick={() => setSelectedImage(img)} className={`w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 ${selectedImage === img ? "border-[#C5A059]" : "border-transparent opacity-60"}`}>
-                  <img src={img} className="w-full h-full object-cover" />
+            {/* 🌟 แสดงรูปย่อย (รวมรูปหลักไว้รูปแรก) 🌟 */}
+            <div className="flex gap-4 mt-4 overflow-x-auto pb-2">
+              
+              {/* 1. ปุ่มสำหรับ "รูปหลัก" (รูปแรกเสมอ) */}
+              {product?.image_url && (
+                <button
+                  onClick={() => setSelectedImage(product.image_url)} 
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${
+                    selectedImage === product.image_url ? "border-[#C5A059] opacity-100" : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={product.image_url}
+                    alt="Main Product"
+                    className="object-cover w-full h-full"
+                  />
+                </button>
+              )}
+
+              {/* 2. แสดงรูปรายละเอียด (Gallery) ถัดมา */}
+              {gallery && gallery.map((imgUrl, index) => (
+                <button
+                  key={index}
+                  onClick={() => setSelectedImage(imgUrl)}
+                  className={`relative w-20 h-20 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${
+                    selectedImage === imgUrl ? "border-[#C5A059] opacity-100" : "border-transparent opacity-60 hover:opacity-100"
+                  }`}
+                >
+                  <img
+                    src={imgUrl}
+                    alt={`gallery-${index}`}
+                    className="object-cover w-full h-full"
+                  />
                 </button>
               ))}
             </div>
@@ -527,7 +554,7 @@ export default function ProductDetail() {
 
 
               <button
-  onClick={() => router.push('/Sharemodel')} // 👈 เพิ่มบรรทัดนี้เข้าไป
+  onClick={() => router.push(`/Sharemodel?id=${product.id}`)} // 👈 เพิ่มบรรทัดนี้เข้าไป
   className="flex flex-col items-center gap-2 py-4 text-gray-500 hover:text-[#C5A059]"
 >
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
