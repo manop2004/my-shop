@@ -162,7 +162,7 @@ function SuccessContent() {
         </div>
 
         <Link 
-          href="/" 
+          href="/mainpage" 
           className="block w-full bg-[#C5A059] hover:bg-[#B38E46] text-white py-3 rounded-md transition duration-300 font-medium mb-4 shadow-sm text-center"
         >
           กลับสู่หน้าหลัก
