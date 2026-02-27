@@ -159,6 +159,7 @@ export default function ShopPage() {
                 <span className="font-medium">สินค้าทั้งหมด</span>
               </div>
             </nav>
+                <div className="mt-4"></div>
           
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Information</div>
             <nav className="flex flex-col gap-3 text-[14px] text-gray-500 pl-3 border-l-2 border-gray-100">

@@ -256,7 +256,7 @@ export default function ProductDetail() {
 
         {/* ส่วนลิงก์ต่างๆ (ไถขึ้นลงได้ถ้ายาว) */}
         <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-white">
-          
+          <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase">Navigation</div>
           {/* เมนูหลัก */}
           <nav className="flex flex-col gap-1">
             <div onClick={() => { router.push('/'); setIsSidebarOpen(false); }} className="group flex items-center gap-4 text-gray-700 hover:text-[#C5A059] cursor-pointer py-3 transition-all rounded-lg hover:bg-gray-50 px-2 -mx-2">
@@ -272,6 +272,7 @@ export default function ProductDetail() {
           <hr className="border-gray-100" />
 
           {/* ส่วนแสดงสินค้าที่กำลังดูอยู่ */}
+          
           <div>
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-4 font-semibold uppercase flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[#C5A059] animate-pulse"></span>
@@ -290,6 +291,7 @@ export default function ProductDetail() {
           </div>
           
           {/* ข้อมูลอื่นๆ ให้ Sidebar ดูไม่โล่ง */}
+          
           <div className="mt-2">
             <div className="text-[10px] text-gray-400 tracking-[0.2em] mb-3 font-semibold uppercase">Information</div>
             <nav className="flex flex-col gap-4 text-[15px] text-gray-500 pl-2 border-l-2 border-gray-100">
@@ -301,13 +303,12 @@ export default function ProductDetail() {
         </div>
 
         {/* ส่วนท้ายเมนู (Footer) */}
-        <div className="p-6 border-t border-gray-100 bg-gray-50/50">
+        <div className="p-6 border-t border-gray-100 bg-[#faf9f7]">
           <div className="text-center text-xs text-gray-400 mb-4 font-serif tracking-wide">
             MUSEUM SHOP
           </div>
           <div className="flex justify-center gap-5 text-gray-400">
-            <svg className="w-5 h-5 hover:text-[#C5A059] cursor-pointer transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/></svg>
-            <svg className="w-5 h-5 hover:text-[#C5A059] cursor-pointer transition-colors" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            
           </div>
         </div>
       </aside>
