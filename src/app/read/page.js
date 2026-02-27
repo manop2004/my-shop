@@ -45,7 +45,7 @@ export default function ReadMore() {
       <div className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-[#e8dcc4] px-6 py-4 flex justify-between items-center shadow-sm">
         <Link href="/" className="flex items-center gap-3">
           <div className="w-2 h-2 bg-[#8c6a2f] rotate-45"></div>
-          <span className="text-[#8c6a2f] font-serif text-lg font-bold">ศูนย์ศิลปาชีพบางไทร</span>
+          <span className="text-[#8c6a2f] font-sans text-lg font-bold">ศูนย์ศิลปาชีพบางไทร</span>
         </Link>
         <Link href="/" className="text-sm tracking-widest uppercase hover:text-[#b48a3c] transition flex items-center gap-2">
           ปิดหน้าอ่าน <span>✕</span>
@@ -63,7 +63,7 @@ export default function ReadMore() {
             <span className="text-[#b48a3c] text-xs tracking-[5px] uppercase font-bold block mb-4 border-b border-[#b48a3c] inline-block pb-1">
               Est. 2527
             </span>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.20] tracking-tight mb-6 text-black [text-shadow:3px_3px_0px_rgba(0,0,0,0.15)]">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-sans font-medium leading-[1.20] tracking-tight mb-6 text-black [text-shadow:3px_3px_0px_rgba(0,0,0,0.15)]">
                 จากอุดมคติ <br /> <span className="text-[#8c6a2f]">สู่ประวัติศาสตร์ที่มีชีวิต</span>
             </h1>
             <div className="w-16 h-[1px] bg-[#b48a3c] mx-auto"></div>
@@ -78,7 +78,7 @@ export default function ReadMore() {
             
             {/* ส่วนที่ 1: เกริ่นนำ */}
             <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed font-light mb-16 relative">
-                <div className="absolute -top-10 -left-6 text-8xl text-[#e8dcc4] opacity-30 font-serif font-bold pointer-events-none">๑</div>
+                <div className="absolute -top-10 -left-6 text-8xl text-[#e8dcc4] opacity-30 font-sans font-bold pointer-events-none">๑</div>
                 
                 <p className="mb-6 indent-12 text-justify">
                     ศูนย์ศิลปาชีพบางไทร โรงเรียนฝึกเกษตรกรและผู้ด้อยโอกาส สู่การเป็นช่างศิลป์ไทย สร้างรายได้เลี้ยงชีพพร้อมสืบสานภูมิปัญญาไทย มรดกล้ำค่าในสมเด็จพระพันปีหลวง
@@ -89,7 +89,7 @@ export default function ReadMore() {
 
             {/* ส่วนที่ 2: ประวัติการก่อตั้ง */}
             <div>
-                <h3 className="text-2xl font-serif text-[#8c6a2f] mb-6 flex items-center gap-4 border-b border-gray-100 pb-4">
+                <h3 className="text-2xl font-sans text-[#8c6a2f] mb-6 flex items-center gap-4 border-b border-gray-100 pb-4">
                     <span className="w-2 h-2 bg-[#b48a3c] rotate-45"></span>
                     จุดกำเนิดแห่งพระมหากรุณาธิคุณ
                 </h3>
@@ -122,7 +122,7 @@ export default function ReadMore() {
 {/* ส่วนที่ 3: แผนที่และการเดินทาง */}
             <div className="mb-24">
                 <div className="text-center mb-12">
-                    <h3 className="text-3xl font-serif text-[#8c6a2f] mb-4 flex items-center justify-center gap-4">
+                    <h3 className="text-3xl font-sans text-[#8c6a2f] mb-4 flex items-center justify-center gap-4">
                         <span className="w-8 h-[1px] bg-[#b48a3c]"></span>
                         การเดินทางและที่ตั้ง
                         <span className="w-8 h-[1px] bg-[#b48a3c]"></span>
@@ -153,7 +153,7 @@ export default function ReadMore() {
 
                     {/* ฝั่งขวา: ข้อมูลติดต่อ */}
                     <div className="flex flex-col justify-center px-8 py-10 lg:px-12 lg:py-12">
-                        <h4 className="text-2xl font-serif text-[#111] mb-8 relative">
+                        <h4 className="text-2xl font-sans text-[#111] mb-8 relative">
                             ศูนย์ศิลปาชีพบางไทร
                             <div className="absolute -left-6 top-2 w-2 h-2 bg-[#8c6a2f] rotate-45 hidden lg:block"></div>
                         </h4>
@@ -218,7 +218,7 @@ export default function ReadMore() {
                 <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                     <div className="relative">
                         <span className="text-[#b48a3c] font-bold tracking-[0.5em] text-xs uppercase mb-2 block"></span>
-                        <h3 className="text-4xl md:text-5xl font-serif text-[#111] leading-none">
+                        <h3 className="text-4xl md:text-5xl font-sans text-[#111] leading-none">
                             ศิลป์แห่ง <span className="text-[#b48a3c] italic">ความทรงจำ</span>
                         </h3>
                     </div>
@@ -235,7 +235,7 @@ export default function ReadMore() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent"></div>
                         <div className="absolute bottom-8 left-8 text-white">
                             <p className="text-[#b48a3c] text-xs tracking-[4px] font-bold mb-2"></p>
-                            <h4 className="text-2xl font-serif tracking-wide"></h4>
+                            <h4 className="text-2xl font-sans tracking-wide"></h4>
                         </div>
                     </div>
 
@@ -250,7 +250,7 @@ export default function ReadMore() {
                             <Image src="/B8.jpg" fill className="object-cover group-hover:scale-110 transition duration-700" alt="Small 2" />
                             <div className="absolute inset-0 border-[1px] border-white/30 m-4 group-hover:m-2 transition-all duration-500"></div>
                             <div className="absolute bottom-4 right-4 text-white text-right">
-                                <p className="text-[10px] opacity-70 italic font-serif"></p>
+                                <p className="text-[10px] opacity-70 italic font-sans"></p>
                                 <p className="text-sm tracking-widest font-bold"></p>
                             </div>
                         </div>
@@ -262,7 +262,7 @@ export default function ReadMore() {
                         <div className="absolute inset-0 bg-[#b48a3c]/10 mix-blend-multiply group-hover:bg-transparent transition duration-500"></div>
                         <div className="absolute inset-0 flex items-center justify-center">
                             <div className="w-[calc(100%-4rem)] h-[calc(100%-4rem)] border border-white/40 flex items-center justify-center">
-                                <span className="text-white text-3xl md:text-5xl font-serif italic tracking-[0.2em] opacity-80 group-hover:opacity-100 transition duration-500"></span>
+                                <span className="text-white text-3xl md:text-5xl font-sans italic tracking-[0.2em] opacity-80 group-hover:opacity-100 transition duration-500"></span>
                             </div>
                         </div>
                     </div>
@@ -281,7 +281,7 @@ export default function ReadMore() {
                         </div>
                     </div>
                     
-            <h2 className="text-3xl md:text-5xl font-serif text-[#111] leading-relaxed mb-10 max-w-4xl mx-auto">
+            <h2 className="text-3xl md:text-5xl font-sans text-[#111] leading-relaxed mb-10 max-w-4xl mx-auto">
                 "สถาปัตยกรรมทุกชิ้น งานปั้นทุกตัว และผ้าทอทุกผืน ไม่ใช่แค่สิ่งของ <br/>
                 <span className="text-[#8c6a2f] italic">แต่เป็นบันทึกทางประวัติศาสตร์ที่ยังมีชีวิต</span>"
             </h2>
