@@ -57,73 +57,71 @@ function FloatingStack({ selectedWorkshop, onClose }) {
   }, [currentIndex]);
 
   const nextImage = () => {
-    setCurrentIndex((prev) =>
-      prev === images.length - 1 ? 0 : prev + 1
-    );
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   };
 
   const prevImage = () => {
-    setCurrentIndex((prev) =>
-      prev === 0 ? images.length - 1 : prev - 1
-    );
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
   return (
-    
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-xl z-[200] flex items-center justify-center p-6">
-
+    <div className="fixed inset-0 bg-black/90 backdrop-blur-xl z-[200] flex items-center justify-center p-4 md:p-6">
+      {/* คลิกพื้นหลังเพื่อปิด */}
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="relative w-full max-w-6xl rounded-3xl z-10">
+      {/* Container หลัก ปรับความสูงให้ Scroll ได้บนมือถือ */}
+      <div className="relative w-full max-w-6xl max-h-[90vh] overflow-y-auto md:overflow-visible rounded-3xl z-10 scrollbar-hide">
+        
+        {/* Glow background (ซ่อนบนมือถือเพื่อลดภาระเครื่อง) */}
+        <div className="hidden md:block absolute -inset-4 bg-gradient-to-br from-[#C6A64A]/20 via-transparent to-[#2c3e35]/20 blur-3xl opacity-40 rounded-[40px]" />
 
-        {/* Glow background */}
-        <div className="absolute -inset-4 bg-gradient-to-br from-[#C6A64A]/20 via-transparent to-[#2c3e35]/20 blur-3xl opacity-40 rounded-[40px]" />
-
-        <div className="relative bg-gradient-to-br from-[#f4f1ea] via-[#f8f6f1] to-[#ece7dd] rounded-3xl shadow-[0_30px_80px_rgba(0,0,0,0.35)] border border-white/40 p-14 overflow-hidden">
-
+        <div className="relative bg-gradient-to-br from-[#f4f1ea] via-[#f8f6f1] to-[#ece7dd] rounded-3xl shadow-2xl border border-white/40 p-6 md:p-14">
+          
+          {/* ปุ่มปิดที่เด่นชัดขึ้นบนมือถือ */}
           <button
-            className="absolute top-6 right-8 text-gray-400 text-3xl hover:text-[#C6A64A] transition"
+            className="absolute top-4 right-4 text-gray-400 text-3xl md:text-4xl hover:text-[#C6A64A] transition z-50 p-2"
             onClick={onClose}
           >
             &times;
           </button>
 
-          <div className="grid md:grid-cols-2 gap-16 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-16 items-start md:items-center">
 
-            {/* LEFT */}
-            <div className="relative flex flex-col items-center justify-center">
+            {/* LEFT: Gallery Section */}
+            <div className="relative flex flex-col items-center justify-center pt-8 md:pt-0">
+              <div className="relative w-full flex justify-center items-center">
+                {/* ปุ่มเลื่อนรูป (ปรับขนาดให้กดง่ายบนมือถือ) */}
+                <button
+                  onClick={prevImage}
+                  className="absolute left-[-10px] md:left-0 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center hover:scale-110 transition"
+                >
+                  ←
+                </button>
 
-              <button
-                onClick={prevImage}
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg hover:scale-110 transition"
-              >
-                ←
-              </button>
+                {images.length > 0 && (
+                  <DraggableCard
+                    key={currentIndex}
+                    img={images[currentIndex]}
+                    rotation={rotation}
+                  />
+                )}
 
-              <button
-                onClick={nextImage}
-                className="absolute right-0 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-lg hover:scale-110 transition"
-              >
-                →
-              </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-[-10px] md:right-0 z-20 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/80 shadow-lg flex items-center justify-center hover:scale-110 transition"
+                >
+                  →
+                </button>
+              </div>
 
-              {images.length > 0 && (
-                <DraggableCard
-                  key={currentIndex}
-                  img={images[currentIndex]}
-                  rotation={rotation}
-                />
-              )}
-
-              <div className="mt-10 flex gap-4 justify-center">
-                {images.slice(0, 6).map((img, index) => (
+              {/* Thumbnails: ปรับให้เลื่อนแนวนอนได้บนมือถือ */}
+              <div className="mt-8 flex gap-3 justify-start md:justify-center overflow-x-auto w-full pb-2 scrollbar-hide">
+                {images.slice(0, 8).map((img, index) => (
                   <div
                     key={index}
                     onClick={() => setCurrentIndex(index)}
-                    className={`relative w-[70px] h-[70px] rounded-xl overflow-hidden cursor-pointer transition-all duration-300
-                    ${currentIndex === index
-                      ? "ring-2 ring-[#C6A64A] scale-110 shadow-md"
-                      : "opacity-50 hover:opacity-100"}`}
+                    className={`relative flex-shrink-0 w-[50px] h-[50px] md:w-[70px] md:h-[70px] rounded-lg overflow-hidden cursor-pointer transition-all duration-300
+                    ${currentIndex === index ? "ring-2 ring-[#C6A64A] scale-105" : "opacity-40"}`}
                   >
                     <Image src={img} alt="" fill className="object-cover" />
                   </div>
@@ -131,29 +129,29 @@ function FloatingStack({ selectedWorkshop, onClose }) {
               </div>
             </div>
 
-            {/* RIGHT */}
-            <div>
-
-              <span className="text-xs tracking-[6px] uppercase text-[#C6A64A] mb-6 block">
+            {/* RIGHT: Content Section */}
+            <div className="flex flex-col text-left">
+              <span className="text-[10px] tracking-[4px] uppercase text-[#C6A64A] mb-3 md:mb-6 block">
                 Workshop Experience
               </span>
 
-              <h3 className="text-4xl md:text-5xl font-serif mb-6 leading-tight bg-gradient-to-r from-[#2c3e35] to-[#6b5a3b] bg-clip-text text-transparent">
+              <h3 className="text-2xl md:text-5xl font-sans mb-4 md:mb-6 leading-tight bg-gradient-to-r from-[#2c3e35] to-[#6b5a3b] bg-clip-text text-transparent">
                 {selectedWorkshop.title}
               </h3>
 
-              <div className="w-16 h-[2px] bg-[#C6A64A] mb-6"></div>
+              <div className="w-12 h-[2px] bg-[#C6A64A] mb-4 md:mb-6"></div>
 
-              <p className="text-gray-600 leading-relaxed mb-10">
+              {/* ปรับฟอนต์ description ให้อ่านง่ายขึ้น */}
+              <p className="text-sm md:text-base text-gray-600 leading-relaxed mb-8 whitespace-pre-line">
                 {selectedWorkshop.fullDesc}
               </p>
 
-              <div className="flex items-center gap-4 mb-8">
-                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-[#C6A64A]/60 to-transparent"></div>
-                <span className="text-[10px] tracking-[6px] uppercase text-[#C6A64A]">
-                  Experience Details
+              <div className="flex items-center gap-3 mb-6">
+                <div className="flex-1 h-[1px] bg-[#C6A64A]/30"></div>
+                <span className="text-[9px] tracking-[4px] uppercase text-[#C6A64A] font-bold">
+                  Details
                 </span>
-                <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent via-[#C6A64A]/60 to-transparent"></div>
+                <div className="flex-1 h-[1px] bg-[#C6A64A]/30"></div>
               </div>
 
               <div className="grid sm:grid-cols-2 gap-6">
@@ -204,7 +202,7 @@ function DetailItem({ icon, title, desc }) {
   const [activeSection, setActiveSection] = useState("home");
   const [selectedImage, setSelectedImage] = useState(null);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
-
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const historyGallery = [
     "/BA.jpg", 
@@ -330,9 +328,13 @@ return (
           <div className="hidden sm:block">เปิดทำการ: อังคาร - อาทิตย์ (08:30 - 16:30 น.)</div>
           <div className="sm:hidden">เปิด 08:30 - 16:30 น.</div>
           <div className="flex items-center gap-2 md:gap-4">
-            <button className="hover:text-[#b48a3c] transition">เข้าสู่ระบบ</button>
+            <Link href="/login" className="hover:text-[#b48a3c] transition">
+              <span className="font-medium">เข้าสู่ระบบ</span>
+            </Link>
             <span className="text-gray-300">|</span>
-            <button className="hover:text-[#b48a3c] transition">สมัครสมาชิก</button>
+            <Link href="/signup" className="hover:text-[#b48a3c] transition">
+              <span className="font-medium">สมัครสมาชิก</span>
+            </Link>
           </div>
         </div>
       </div>
@@ -342,7 +344,7 @@ return (
       <div className="bg-white py-8 md:py-12 text-center relative border-b border-[#f2ece0] px-4">
         <div className="max-w-[1200px] mx-auto">
           <div className="w-12 md:w-16 h-[2px] bg-[#b48a3c] mx-auto mb-4 md:mb-5 animate-pulse"></div>
-          <h1 className="text-3xl md:text-5xl text-[#8c6a2f] tracking-[1px] font-bold mb-3 md:mb-4 font-serif">
+          <h1 className="text-3xl md:text-5xl text-[#8c6a2f] tracking-[1px] font-bold mb-3 md:mb-4 font-sans">
             ศูนย์ศิลปาชีพบางไทร
           </h1>
           <p className="text-[14px] md:text-[16px] text-gray-500 tracking-wide font-light">
@@ -351,70 +353,84 @@ return (
         </div>
       </div>
 
-{/* ===== PREMIUM NAVBAR ===== */}
-<nav className="bg-white sticky top-[36px] z-40 shadow-[0_4px_20px_rgba(0,0,0,0.05)] border-b border-[#f0e7d8]">
-  <div className="flex md:justify-center gap-10 text-[14px] md:text-[15px] font-medium max-w-[1200px] mx-auto px-4 h-[56px] items-center">
+  {/* ===== PREMIUM NAVBAR (Hamburger Menu สำหรับมือถือ) ===== */}
+<nav className="bg-white/98 backdrop-blur-md sticky top-[36px] z-40 shadow-sm border-b border-[#f0e7d8] w-full">
+  <div className="max-w-[1200px] mx-auto w-full">
+    
+    {/* ------------------------------------------- */}
+    {/* 1. เมนูสำหรับหน้าจอคอมพิวเตอร์ (ซ่อนในมือถือ) */}
+    {/* ------------------------------------------- */}
+    <div className="hidden md:flex items-center justify-center gap-6 px-4 py-3 text-[15px] font-medium">
+      <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); setActiveSection("home"); }} className={`flex items-center gap-2 px-5 py-2 rounded-full transition-all duration-500 border ${ activeSection === "home" ? "border-[#C6A64A]/40 bg-[#fdfbf7] text-[#C6A64A]" : "border-transparent text-gray-400 hover:text-[#C6A64A] hover:bg-[#fdfbf7]" }`}>
+        {activeSection === "home" && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A64A]"></span>} <span>หน้าหลัก</span>
+      </a>
+      <a href="#story" onClick={(e) => scrollToSection(e, "story")} className={`flex items-center gap-2 px-5 py-2 rounded-full transition-all duration-500 border ${ activeSection === "story" ? "border-[#C6A64A]/40 bg-[#fdfbf7] text-[#C6A64A]" : "border-transparent text-gray-400 hover:text-[#C6A64A] hover:bg-[#fdfbf7]" }`}>
+        {activeSection === "story" && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A64A]"></span>} <span>ความเป็นมา</span>
+      </a>
+      <Link href="/read" className="flex items-center gap-2 px-5 py-2 rounded-full transition-all duration-500 border border-transparent text-gray-400 hover:text-[#C6A64A] hover:bg-[#fdfbf7]">
+        <span>เรื่องราว</span>
+      </Link>
+      <a href="#workshop" onClick={(e) => scrollToSection(e, "workshop")} className={`flex items-center gap-2 px-5 py-2 rounded-full transition-all duration-500 border ${ activeSection === "workshop" ? "border-[#C6A64A]/40 bg-[#fdfbf7] text-[#C6A64A]" : "border-transparent text-gray-400 hover:text-[#C6A64A] hover:bg-[#fdfbf7]" }`}>
+        {activeSection === "workshop" && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A64A]"></span>} <span>กิจกรรมเวิร์กชอป</span>
+      </a>
+      <Link href="/mainpage" className="flex items-center gap-2 px-5 py-2 rounded-full transition-all duration-500 border border-transparent text-gray-400 hover:text-[#C6A64A] hover:bg-[#fdfbf7]">
+        <span>ผลิตภัณฑ์ศิลปาชีพ</span>
+      </Link>
+    </div>
 
-    <a
-      href="#"
-      onClick={(e) => {
-        e.preventDefault();
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        setActiveSection("home");
-      }}
-      className={`relative transition ${
-        activeSection === "home"
-          ? "text-[#C6A64A]"
-          : "text-gray-600 hover:text-[#C6A64A]"
-      }`}
-    >
-      หน้าหลัก
-      {activeSection === "home" && (
-        <span className="absolute -bottom-3 left-0 w-full h-[2px] bg-[#C6A64A]"></span>
-      )}
-    </a>
+    {/* ------------------------------------------- */}
+    {/* 2. แถบ Navigation สำหรับมือถือโดยเฉพาะ */}
+    {/* ------------------------------------------- */}
+    <div className="flex md:hidden items-center justify-between px-5 py-3">
+      {/* โชว์ชื่อเมนูที่กำลังเปิดอยู่ */}
+      <div className="text-[#C6A64A] font-medium text-[15px] flex items-center gap-2">
+        <span className="w-2 h-2 rounded-full bg-[#C6A64A]"></span>
+        {activeSection === "home" && "หน้าหลัก"}
+        {activeSection === "story" && "ความเป็นมา"}
+        {activeSection === "workshop" && "กิจกรรมเวิร์กชอป"}
+        {(!["home", "story", "workshop"].includes(activeSection)) && "เมนูนำทาง"}
+      </div>
 
-    <a
-      href="#story"
-      onClick={(e) => scrollToSection(e, "story")}
-      className={`relative transition ${
-        activeSection === "story"
-          ? "text-[#C6A64A]"
-          : "text-gray-600 hover:text-[#C6A64A]"
-      }`}
-    >
-      ความเป็นมา
-      {activeSection === "story" && (
-        <span className="absolute -bottom-3 left-0 w-full h-[2px] bg-[#C6A64A]"></span>
-      )}
-    </a>
+      {/* ปุ่มเปิด-ปิด 3 ขีด */}
+      <button 
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} 
+        className="p-1 text-gray-500 hover:text-[#C6A64A] focus:outline-none transition-colors"
+      >
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          {isMobileMenuOpen ? (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          ) : (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          )}
+        </svg>
+      </button>
+    </div>
 
-    <Link href="/read" className="text-gray-600 hover:text-[#C6A64A] transition">
-      เรื่องราว
-    </Link>
-
-    <a
-      href="#workshop"
-      onClick={(e) => scrollToSection(e, "workshop")}
-      className={`relative transition ${
-        activeSection === "workshop"
-          ? "text-[#C6A64A]"
-          : "text-gray-600 hover:text-[#C6A64A]"
-      }`}
-    >
-      กิจกรรมเวิร์กชอป
-      {activeSection === "workshop" && (
-        <span className="absolute -bottom-3 left-0 w-full h-[2px] bg-[#C6A64A]"></span>
-      )}
-    </a>
-
-    <Link href="/mainpage" className="text-gray-600 hover:text-[#C6A64A] transition">
-      ผลิตภัณฑ์ศิลปาชีพ
-    </Link>
+    {/* ------------------------------------------- */}
+    {/* 3. รายการเมนูที่กางออก (Dropdown มือถือ) */}
+    {/* ------------------------------------------- */}
+    <div className={`md:hidden absolute w-full left-0 bg-white/95 backdrop-blur-md shadow-lg border-b border-[#f0e7d8] transition-all duration-300 overflow-hidden ${isMobileMenuOpen ? 'max-h-[300px] py-2' : 'max-h-0 py-0'}`}>
+      <div className="flex flex-col px-4 text-[15px] font-medium">
+        <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); setActiveSection("home"); setIsMobileMenuOpen(false); }} className={`px-4 py-3 rounded-xl transition-all ${ activeSection === "home" ? "bg-[#fdfbf7] text-[#C6A64A]" : "text-gray-500 active:bg-gray-50" }`}>
+          หน้าหลัก
+        </a>
+        <a href="#story" onClick={(e) => { scrollToSection(e, "story"); setIsMobileMenuOpen(false); }} className={`px-4 py-3 rounded-xl transition-all ${ activeSection === "story" ? "bg-[#fdfbf7] text-[#C6A64A]" : "text-gray-500 active:bg-gray-50" }`}>
+          ความเป็นมา
+        </a>
+        <Link href="/read" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 rounded-xl text-gray-500 active:bg-gray-50 transition-all">
+          เรื่องราว
+        </Link>
+        <a href="#workshop" onClick={(e) => { scrollToSection(e, "workshop"); setIsMobileMenuOpen(false); }} className={`px-4 py-3 rounded-xl transition-all ${ activeSection === "workshop" ? "bg-[#fdfbf7] text-[#C6A64A]" : "text-gray-500 active:bg-gray-50" }`}>
+          กิจกรรมเวิร์กชอป
+        </a>
+        <Link href="/mainpage" onClick={() => setIsMobileMenuOpen(false)} className="px-4 py-3 rounded-xl text-gray-500 active:bg-gray-50 transition-all">
+          ผลิตภัณฑ์ศิลปาชีพ
+        </Link>
+      </div>
+    </div>
 
   </div>
 </nav>
-
       {/* HERO SECTION */}
       <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center overflow-hidden">
         <Image src="/BC.jpg" alt="Bang Sai Hero" fill className="object-cover z-0" priority />
@@ -424,7 +440,7 @@ return (
           <span className="text-[#e8dcc4] text-[10px] md:text-sm lg:text-lg tracking-[3px] md:tracking-[4px] mb-3 uppercase">
             Bang Sai Arts and Crafts Centre
           </span>
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-10 drop-shadow-lg font-serif">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-10 drop-shadow-lg font-sans">
             สืบสานงานศิลป์ แผ่นดินสยาม
           </h2>
         </FadeIn>
@@ -445,7 +461,7 @@ return (
         <FadeIn delay={400} className="hidden lg:flex absolute left-0 -top-[180px] bottom-0 w-[140px] justify-center">
           <div className="relative flex flex-col items-center h-full">
             <div className="w-[2px] flex-1 bg-gradient-to-b from-transparent to-black"></div>
-            <div className="py-6 text-[50px] font-serif text-black">๐๑</div>
+            <div className="py-6 text-[50px] font-sans text-black">๐๑</div>
             <div className="w-[2px] h-[160px] bg-black"></div>
             <div className="py-18 rotate-[-90deg] text-[15px] tracking-[3px] text-black/70">ความเป็นมา</div>
             <div className="w-[2px] flex-1 bg-black"></div>
@@ -456,7 +472,7 @@ return (
 
           {/* ซ้าย: เนื้อหา */}
           <FadeIn className="order-2 lg:order-1" delay={100}>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.20] tracking-tight mb-8 md:mb-10 text-black [text-shadow:3px_3px_0px_rgba(0,0,0,0.15)] md:[text-shadow:5px_5px_0px_rgba(0,0,0,0.22)]">
+            <h2 className="text-4xl md:text-5xl lg:text-6xl font-sans font-medium leading-[1.20] tracking-tight mb-8 md:mb-10 text-black [text-shadow:3px_3px_0px_rgba(0,0,0,0.15)] md:[text-shadow:5px_5px_0px_rgba(0,0,0,0.22)]">
               จากอุดมคติ <br />
               สู่สถาปัตยกรรมที่มีชีวิต
             </h2>
@@ -524,7 +540,7 @@ return (
               {/* แคปชั่น */}
               <div className="absolute bottom-0 md:bottom-4 left-2 md:left-6 bg-white/95 backdrop-blur-sm p-3 md:p-4 shadow-xl z-30 border-l-[3px] border-[#C6A64A] max-w-[160px] md:max-w-[220px]">
                  <p className="text-[8px] md:text-[9px] uppercase tracking-widest text-[#C6A64A] font-bold mb-1">Fig. 01</p>
-                 <p className="text-[10px] md:text-xs text-gray-700 font-serif leading-relaxed">
+                 <p className="text-[10px] md:text-xs text-gray-700 font-sans leading-relaxed">
                    สถาปัตยกรรมและงานฝีมือที่ได้รับการอนุรักษ์อย่างวิจิตรบรรจง
                  </p>
               </div>
@@ -532,7 +548,7 @@ return (
               {/* ตราประทับ */}
               <div className="absolute -top-2 md:-top-4 right-8 md:right-16 w-14 h-14 md:w-20 md:h-20 z-30 bg-[#2c3e35] rounded-full flex flex-col items-center justify-center text-[#C6A64A] shadow-lg border border-[#C6A64A]/30">
                  <span className="text-[6px] md:text-[8px] tracking-[1px] md:tracking-[2px] uppercase mb-0 md:mb-1">Est.</span>
-                 <span className="text-sm md:text-lg font-serif leading-none">2527</span>
+                 <span className="text-sm md:text-lg font-sans leading-none">2527</span>
               </div>
 
             </div>
@@ -548,7 +564,7 @@ return (
         <FadeIn delay={200} className="hidden lg:flex absolute left-0 -top-[180px] bottom-0 w-[140px] justify-center">
          <div className="relative flex flex-col items-center h-full">
             <div className="w-[2px] flex-1 bg-gradient-to-b from-transparent to-black"></div>
-            <div className="py-6 text-[50px] font-serif text-black">๐๒</div>
+            <div className="py-6 text-[50px] font-sans text-black">๐๒</div>
             <div className="w-[2px] h-[160px] bg-black"></div>
             <div className="py-18 rotate-[-90deg] text-[15px] tracking-[3px] text-black/70">กิจกรรมเวิร์กชอป</div>
             <div className="w-[2px] flex-1 bg-black"></div>
@@ -558,7 +574,7 @@ return (
         <div className="w-full max-w-[1200px] mx-auto px-4 md:px-6 relative z-10">
           <FadeIn className="flex flex-col items-center text-center mb-12 md:mb-20">
              <div className="h-[30px] md:h-[50px] w-[1px] bg-gradient-to-b from-transparent to-[#C6A64A] mb-4 md:mb-6"></div>
-             <h3 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-[1.20] tracking-tight mb-8 md:mb-10 text-black [text-shadow:3px_3px_0px_rgba(0,0,0,0.15)] md:[text-shadow:5px_5px_0px_rgba(0,0,0,0.22)]">
+             <h3 className="text-4xl md:text-5xl lg:text-6xl font-sans font-medium leading-[1.20] tracking-tight mb-8 md:mb-10 text-black [text-shadow:3px_3px_0px_rgba(0,0,0,0.15)] md:[text-shadow:5px_5px_0px_rgba(0,0,0,0.22)]">
               กิจกรรมเวิร์กชอป
               </h3>
              <p className="text-sm md:text-base text-gray-500 max-w-lg leading-relaxed">
@@ -578,7 +594,7 @@ return (
                 </div>
                 
                 <div className="text-center px-2">
-                  <h4 className="text-xl md:text-2xl font-serif text-[#8c6a2f] mb-2 md:mb-3">{workshop.title}</h4>
+                  <h4 className="text-xl md:text-2xl font-sans text-[#8c6a2f] mb-2 md:mb-3">{workshop.title}</h4>
                   <p className="text-xs md:text-sm text-gray-600 leading-relaxed mb-4 md:mb-6 font-light">{workshop.shortDesc}</p>
                   <span
   onClick={() => setSelectedWorkshop(workshop)}
@@ -596,8 +612,7 @@ return (
       {/* ================= FOOTER ================= */}
       <footer className="bg-[#111815] text-gray-400 py-12 md:py-16 text-center text-sm border-t border-gray-800 px-4">
         <div className="max-w-xl mx-auto mb-6">
-          <Image src="/logo-signature.png" alt="Signature" width={100} height={35} className="mx-auto mb-4 md:mb-6 opacity-30" />
-          <h2 className="text-xl md:text-2xl font-serif text-[#C6A64A] mb-3 md:mb-4 tracking-wider">PATTANA GEMS x ศูนย์ศิลปาชีพ</h2>
+          <h2 className="text-xl md:text-2xl font-sans text-[#C6A64A] mb-3 md:mb-4 tracking-wider"> MUSEUM SHOP x ศูนย์ศิลปาชีพ</h2>
           <p className="font-light tracking-wide text-gray-500 text-xs md:text-sm">ร่วมสืบสานและต่อยอดงานหัตถกรรมไทยให้ก้าวไกลสู่สากล</p>
         </div>
         <p className="text-[10px] md:text-[12px] uppercase tracking-widest text-gray-600 mt-8 md:mt-12">© 2026 Bang Sai Arts & Crafts Centre. All rights reserved.</p>

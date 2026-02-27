@@ -47,7 +47,10 @@ export default async function AdminInquiriesPage({ searchParams }) {
       {/* 📱 Mobile Card */}
       <div className="grid grid-cols-1 gap-4 md:hidden mb-6">
         {inquiries?.map((x) => (
-          <div key={x.id} className="bg-white p-4 rounded-xl shadow-sm border border-yellow-100 flex flex-col gap-3">
+          <div
+            key={x.id}
+            className="bg-white p-4 rounded-xl shadow-sm border border-yellow-100 flex flex-col gap-3"
+          >
             <div>
               <h3 className="font-bold text-gray-800 text-base">{x.full_name}</h3>
               <p className="text-xs text-gray-500">{x.email}</p>
@@ -60,7 +63,9 @@ export default async function AdminInquiriesPage({ searchParams }) {
               <p className="text-gray-700 font-medium">
                 หัวข้อ: <span className="font-normal text-gray-600">{x.topic}</span>
               </p>
-              <p className="text-gray-500 text-xs mt-2 bg-gray-50 p-2 rounded-md whitespace-pre-wrap">
+
+              {/* ✅ ข้อความยาวตัดบรรทัดแน่นอน */}
+              <p className="text-gray-500 text-xs mt-4 bg-gray-50 p-2 rounded-md whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
                 {x.message}
               </p>
             </div>
@@ -76,15 +81,15 @@ export default async function AdminInquiriesPage({ searchParams }) {
       </div>
 
       {/* 💻 Desktop Table */}
-      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-yellow-100 mb-6 w-full overflow-hidden">
-        <table className="w-full text-left text-sm">
+      <div className="hidden md:block bg-white rounded-xl shadow-sm border border-yellow-100 mb-6 w-full overflow-x-auto">
+        <table className="w-full text-left text-sm table-fixed">
           <thead className="bg-[#fcf8f2] border-b border-yellow-100 whitespace-nowrap">
             <tr>
               <th className="px-4 py-4 font-semibold text-gray-800 w-[14%]">เวลา</th>
               <th className="px-4 py-4 font-semibold text-gray-800 w-[16%]">ชื่อ</th>
               <th className="px-4 py-4 font-semibold text-gray-800 w-[18%]">อีเมล</th>
-              <th className="px-4 py-4 font-semibold text-gray-800 w-[16%]">หัวข้อ</th>
-              <th className="px-4 py-4 font-semibold text-gray-800 w-[36%]">ข้อความ</th>
+              <th className="px-4 py-4 font-semibold text-gray-800 w-[22%] pr-12 whitespace-nowrap">หัวข้อ</th>
+              <th className="px-4 py-4 font-semibold text-gray-800 w-[32%] pl-12">ข้อความ</th>
             </tr>
           </thead>
 
@@ -94,16 +99,29 @@ export default async function AdminInquiriesPage({ searchParams }) {
                 <td className="px-4 py-4 text-gray-500 whitespace-nowrap">
                   {x.created_at ? new Date(x.created_at).toLocaleString("th-TH") : "-"}
                 </td>
+
                 <td className="px-4 py-4 font-medium text-gray-800 whitespace-nowrap">
                   {x.full_name}
                 </td>
+
                 <td className="px-4 py-4 text-gray-600">{x.email}</td>
-                <td className="px-4 py-4 text-gray-700">{x.topic}</td>
-                <td className="px-4 py-4 text-gray-500">
-                  <div className="line-clamp-2 whitespace-pre-wrap" title={x.message}>
-                    {x.message}
-                  </div>
-                </td>
+                <td className="px-4 py-4 pr-12 text-gray-700 whitespace-nowrap">
+  {x.topic}
+</td>
+
+                
+                {/* ✅ ข้อความยาวตัดบรรทัดแน่นอน (แม้ไม่มีเว้นวรรค) */}
+                <td className="px-4 pt-6 py-4 text-gray-500 align-top">
+  <div
+    style={{
+      whiteSpace: "pre-wrap",
+      overflowWrap: "anywhere",
+      wordBreak: "break-word",
+    }}
+  >
+    {x.message}
+  </div>
+</td>
               </tr>
             ))}
 
@@ -123,7 +141,7 @@ export default async function AdminInquiriesPage({ searchParams }) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-4 mt-2">
+        <div className="flex justify-center items-center gap-4 mt-4">
           {page > 1 ? (
             <Link
               href={`?page=${page - 1}`}

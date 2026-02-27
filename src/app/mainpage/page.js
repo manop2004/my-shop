@@ -378,7 +378,7 @@ export default function ShopPage() {
       {/* FOOTER */}
       <footer className="bg-[#1a1a1a] text-gray-400 py-8 border-t border-[#333]">
         <div className="max-w-[1300px] mx-auto px-6 text-center text-xs">
-          <p>© 2024 ศูนย์ศิลปาชีพบางไทร. All rights reserved.</p>
+          <p>© 2026 ศูนย์ศิลปาชีพบางไทร.</p>
         </div>
       </footer>
     </div>
