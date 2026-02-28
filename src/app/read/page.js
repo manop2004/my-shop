@@ -198,7 +198,7 @@ export default function ReadMore() {
                         {/* ปุ่มเปิดในแผนที่ */}
                         <div className="mt-10 pt-8 border-t border-gray-200 border-dashed">
                             <a 
-                                href="https://maps.app.goo.gl/3QWzQjP9w9bY2qWw5" 
+                                href="https://maps.app.goo.gl/RUJPXCZu2bvsgVVq9" 
                                 target="_blank" 
                                 rel="noreferrer" 
                                 className="inline-flex items-center gap-2 px-6 py-3 border border-[#2c3e35] text-[#2c3e35] text-xs tracking-widest uppercase hover:bg-[#2c3e35] hover:text-white transition-colors duration-300"
